@@ -130,10 +130,10 @@ export default function Shield() {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-gray-400 px-2">
-                  <span>Flagged Clauses ({analysis.flags.length})</span>
+                  <span>Flagged Clauses ({(analysis?.flags || []).length})</span>
                 </div>
 
-                {analysis.flags.map((flag: any, i: number) => (
+                {(analysis?.flags || []).map((flag: any, i: number) => (
                   <GlassCard key={i} className={`p-4 border-l-4 ${flag.severity === "HIGH" ? "border-l-rose-500" :
                     flag.severity === "MEDIUM" ? "border-l-amber-500" : "border-l-emerald-500"
                     }`}>
@@ -161,11 +161,11 @@ export default function Shield() {
                   </GlassCard>
                 ))}
 
-                {analysis.missing_clauses.length > 0 && (
+                {(analysis?.missing_clauses || []).length > 0 && (
                   <div className="mt-4">
                     <h4 className="text-sm font-medium text-gray-400 mb-2 px-2">Missing Clauses</h4>
                     <div className="space-y-2">
-                      {analysis.missing_clauses.map((clause: string, i: number) => (
+                      {(analysis?.missing_clauses || []).map((clause: string, i: number) => (
                         <div key={i} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10 text-xs text-gray-300">
                           <AlertTriangle className="w-4 h-4 text-amber-500" />
                           {clause}

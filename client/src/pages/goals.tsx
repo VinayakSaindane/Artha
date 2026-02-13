@@ -5,9 +5,17 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useState, useEffect } from "react";
-import { TrendingUp, School, Umbrella, Home, Loader2 } from "lucide-react";
+import { TrendingUp, School, Umbrella, Home, Loader2, Plus, Target } from "lucide-react";
 import { goalsApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Goals() {
   const [age, setAge] = useState([28]);
@@ -16,7 +24,33 @@ export default function Goals() {
   const [planning, setPlanning] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [goals, setGoals] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({ name: "", target_amount: "", category: "Other", deadline: "" });
   const { toast } = useToast();
+
+  const categoryIcons: any = {
+    Education: School,
+    Emergency: Umbrella,
+    Housing: Home,
+    Retirement: Target,
+    Other: Target
+  };
+
+  const categoryColors: any = {
+    Education: "border-l-blue-500",
+    Emergency: "border-l-rose-500",
+    Housing: "border-l-purple-500",
+    Retirement: "border-l-emerald-500",
+    Other: "border-l-gray-500"
+  };
+
+  const iconColors: any = {
+    Education: "text-blue-500",
+    Emergency: "text-rose-500",
+    Housing: "text-purple-500",
+    Retirement: "text-emerald-500",
+    Other: "text-gray-500"
+  };
 
   useEffect(() => {
     fetchGoals();
@@ -31,14 +65,30 @@ export default function Goals() {
     }
   };
 
+  const handleAddGoal = async () => {
+    if (!newGoal.name || !newGoal.target_amount) return;
+    try {
+      await goalsApi.createGoal({
+        ...newGoal,
+        target_amount: parseFloat(newGoal.target_amount)
+      });
+      toast({ title: "Goal Set! 🎯", description: "Your new financial target has been saved." });
+      setIsDialogOpen(false);
+      setNewGoal({ name: "", target_amount: "", category: "Other", deadline: "" });
+      fetchGoals();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create goal.", variant: "destructive" });
+    }
+  };
+
   const handlePlan = async () => {
     setPlanning(true);
     try {
       const response = await goalsApi.plan({
         age: age[0],
         retirement_age: retireAge[0],
-        income: 50000, // Default or from user store
-        current_savings: 500000, // Default
+        income: 50000,
+        current_savings: 500000,
         monthly_sip: savings,
         risk_appetite: "moderate"
       });
@@ -58,7 +108,7 @@ export default function Goals() {
     }
   };
 
-  const chartData = plan ? plan.year_by_year_projection : [
+  const chartData = plan?.year_by_year_projection || [
     { year: '2025', corpus: 500000, age: age[0] },
     { year: '2030', corpus: 2500000, age: age[0] + 5 },
     { year: '2035', corpus: 6500000, age: age[0] + 10 },
@@ -69,7 +119,71 @@ export default function Goals() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Goals & Planning" subtitle="Map out your financial journey to freedom" />
+      <div className="flex justify-between items-center">
+        <PageHeader title="Goals & Planning" subtitle="Map out your financial journey to freedom" />
+
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary hover:bg-primary/90 text-white">
+              <Plus className="w-4 h-4 mr-2" /> Add Goal
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">
+            <DialogHeader>
+              <DialogTitle>Set New Financial Goal</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Goal Name</Label>
+                <Input
+                  placeholder="e.g. Dream House"
+                  value={newGoal.name}
+                  onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
+                  className="bg-black/40 border-white/10 text-white"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Target Amount (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="2500000"
+                    value={newGoal.target_amount}
+                    onChange={(e) => setNewGoal({ ...newGoal, target_amount: e.target.value })}
+                    className="bg-black/40 border-white/10 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={newGoal.category}
+                    onValueChange={(val) => setNewGoal({ ...newGoal, category: val })}
+                  >
+                    <SelectTrigger className="bg-black/40 border-white/10 text-white">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0D1425] border-white/10 text-white">
+                      {['Retirement', 'Education', 'Emergency', 'Housing', 'Other'].map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Target Date</Label>
+                <Input
+                  type="date"
+                  value={newGoal.deadline}
+                  onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
+                  className="bg-black/40 border-white/10 text-white"
+                />
+              </div>
+              <Button onClick={handleAddGoal} className="w-full bg-primary mt-4">Save Goal</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <GlassCard className="lg:col-span-1 p-6 space-y-8">
@@ -103,7 +217,7 @@ export default function Goals() {
           </div>
 
           <Button
-            className="w-full h-12 bg-primary hover:bg-primary/90 text-white"
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)]"
             onClick={handlePlan}
             disabled={planning}
           >
@@ -112,8 +226,11 @@ export default function Goals() {
           </Button>
 
           {plan && (
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-              <div className="flex gap-3">
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Target className="w-12 h-12" />
+              </div>
+              <div className="flex gap-3 relative z-10">
                 <div className="p-2 bg-emerald-500/20 rounded-full h-fit">
                   <TrendingUp className="w-5 h-5 text-emerald-400" />
                 </div>
@@ -149,43 +266,38 @@ export default function Goals() {
                     itemStyle={{ color: '#fff' }}
                     formatter={(value: any) => [`₹${value.toLocaleString()}`, "Corpus"]}
                   />
-                  <Area type="monotone" dataKey={plan ? "corpus" : "amount"} stroke="#3B82F6" fillOpacity={1} fill="url(#colorAmount)" />
+                  <Area type="monotone" dataKey="corpus" stroke="#3B82F6" fillOpacity={1} fill="url(#colorAmount)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           </GlassCard>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <GlassCard className="p-4 flex flex-col justify-between min-h-[140px] border-l-4 border-l-blue-500">
-              <School className="w-6 h-6 text-blue-500 mb-2" />
-              <div>
-                <p className="text-sm text-gray-400">Child Education</p>
-                <h4 className="text-xl font-bold text-white">₹25L</h4>
-                <p className="text-xs text-gray-500 mt-1">Target: 2035</p>
+            {goals.length === 0 ? (
+              <div className="col-span-3 h-32 flex flex-col items-center justify-center text-gray-500 border-2 border-dashed border-white/5 rounded-2xl">
+                <Target className="w-8 h-8 mb-2 opacity-20" />
+                <p className="text-sm">No custom goals set yet</p>
               </div>
-            </GlassCard>
-
-            <GlassCard className="p-4 flex flex-col justify-between min-h-[140px] border-l-4 border-l-rose-500">
-              <Umbrella className="w-6 h-6 text-rose-500 mb-2" />
-              <div>
-                <p className="text-sm text-gray-400">Emergency Fund</p>
-                <h4 className="text-xl font-bold text-white">₹5L</h4>
-                <p className="text-xs text-gray-500 mt-1">Status: 60% Done</p>
-              </div>
-            </GlassCard>
-
-            <GlassCard className="p-4 flex flex-col justify-between min-h-[140px] border-l-4 border-l-purple-500">
-              <Home className="w-6 h-6 text-purple-500 mb-2" />
-              <div>
-                <p className="text-sm text-gray-400">Home Down Payment</p>
-                <h4 className="text-xl font-bold text-white">₹40L</h4>
-                <p className="text-xs text-gray-500 mt-1">Target: 2028</p>
-              </div>
-            </GlassCard>
+            ) : (
+              goals.map((g, i) => {
+                const Icon = categoryIcons[g.category] || Target;
+                return (
+                  <GlassCard key={i} className={`p-4 flex flex-col justify-between min-h-[140px] border-l-4 ${categoryColors[g.category] || "border-l-gray-500"}`}>
+                    <Icon className={`w-6 h-6 ${iconColors[g.category] || "text-gray-500"} mb-2`} />
+                    <div>
+                      <p className="text-sm text-gray-400 truncate">{g.name}</p>
+                      <h4 className="text-xl font-bold text-white">₹{(g.target_amount / 100000).toFixed(1)}L</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {g.deadline ? `Target: ${new Date(g.deadline).getFullYear()}` : 'No deadline'}
+                      </p>
+                    </div>
+                  </GlassCard>
+                )
+              })
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 }
-
