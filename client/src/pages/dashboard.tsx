@@ -97,7 +97,9 @@ export default function Dashboard() {
         savings: (user?.monthly_income || 0) - totalExpenses
       });
     } catch (error) {
-      console.error("Failed to fetch dashboard data", error);
+      console.error("Dashboard Fetch Error:", error);
+      // Fallback: Set empty stats to stop loader
+      setStats({ income: user?.monthly_income || 0, expenses: 0, savings: 0 });
     } finally {
       setLoading(false);
     }
