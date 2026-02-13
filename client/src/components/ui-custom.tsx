@@ -77,8 +77,6 @@ export function PageHeader({ title, subtitle }: { title: string; subtitle?: stri
   return (
     <div className="mb-10 space-y-2 animate-in fade-in slide-in-from-left-4 duration-700">
       <div className="flex items-center gap-2">
-        <div className="h-[2px] w-8 bg-primary rounded-full" />
-        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Cyber Sentinel Protocol</span>
       </div>
       <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase italic">
         {title}

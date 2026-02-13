@@ -1,365 +1,323 @@
 import { GlassCard, PageHeader } from "@/components/ui-custom";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Activity, AlertOctagon, TrendingUp, DollarSign, Loader2, Sparkles, CheckCircle, Zap, ArrowRight } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import {
+  Activity,
+  AlertOctagon,
+  Loader2,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  ShieldCheck,
+  IndianRupee,
+  RefreshCw,
+  ChevronRight
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  ReferenceLine
+} from "recharts";
 import { useState, useEffect } from "react";
 import { pulseApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 export default function Pulse() {
-  const [showScenario, setShowScenario] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
+  const [isApplying, setIsApplying] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load cached analysis first for instant feel
     const cached = localStorage.getItem("pulse_analysis");
-    if (cached) {
-      setAnalysis(JSON.parse(cached));
-    }
+    if (cached) setAnalysis(JSON.parse(cached));
     fetchAnalysis();
   }, []);
 
-  const [loadingStep, setLoadingStep] = useState(0);
-  const loadingSteps = [
-    "Initializing Sentinel Pulse...",
-    "Scanning EMI Risk Vectors...",
-    "Analyzing Debt-to-Income Liquidity...",
-    "Predicting Trap Forecast Curves...",
-    "Finalizing Strategic Prescription..."
-  ];
-
-  useEffect(() => {
-    let interval: any;
-    if (analyzing) {
-      interval = setInterval(() => {
-        setLoadingStep(prev => (prev + 1) % loadingSteps.length);
-      }, 1500);
-    }
-    return () => clearInterval(interval);
-  }, [analyzing]);
-
   const fetchAnalysis = async () => {
     setAnalyzing(true);
-    // Artificially delay for the "Tech" feel
-    await new Promise(r => setTimeout(r, 4000));
     try {
       const response = await pulseApi.analyze();
       setAnalysis(response.data);
       localStorage.setItem("pulse_analysis", JSON.stringify(response.data));
-    } catch (error: any) {
+    } catch {
       toast({ title: "Error", description: "Pulse scan failed.", variant: "destructive" });
     } finally {
       setAnalyzing(false);
     }
   };
 
-  const [isApplying, setIsApplying] = useState(false);
-
   const handleApply = () => {
     setIsApplying(true);
     toast({ title: "Syncing Strategy...", description: "AI is configuring your SIPs and budget limits." });
     setTimeout(() => {
       setIsApplying(false);
-      toast({
-        title: "Strategy Applied! 🚀",
-        description: "Your monthly SIP has been simulated and budget targets locked.",
-      });
+      toast({ title: "Strategy Applied! 🚀", description: "Your monthly SIP has been simulated and budget targets locked." });
     }, 2500);
   };
 
+  const score = analysis?.health_score || 0;
+  const status = analysis?.status || "SAFE";
+
+  const statusConfig = {
+    SAFE: { label: "Healthy", color: "text-emerald-400", bg: "bg-emerald-500/15", border: "border-emerald-500/20", bar: "bg-emerald-500", ring: "border-emerald-500/30" },
+    WARNING: { label: "Needs Attention", color: "text-amber-400", bg: "bg-amber-500/15", border: "border-amber-500/20", bar: "bg-amber-500", ring: "border-amber-500/30" },
+    DANGER: { label: "Critical", color: "text-rose-400", bg: "bg-rose-500/15", border: "border-rose-500/20", bar: "bg-rose-500", ring: "border-rose-500/30" }
+  };
+  const cfg = statusConfig[status as keyof typeof statusConfig] || statusConfig.SAFE;
+
+  const scoreColor = score > 70 ? "#10B981" : score > 40 ? "#F59E0B" : "#EF4444";
+  const emiRatio = analysis?.emi_to_income_ratio || 0;
+  const savingsRate = analysis?.savings_rate || 0;
+
   const healthTrend = [
-    { month: 'Trending', score: analysis?.health_score || 70 },
-    { month: 'Current', score: analysis?.health_score || 72 },
+    { month: "3M ago", score: Math.max(10, score - 12) },
+    { month: "2M ago", score: Math.max(10, score - 6) },
+    { month: "Last Mo", score: Math.max(10, score - 2) },
+    { month: "Now", score: score },
   ];
 
+  // ── Loading State ──────────────────────────────────────────────────────────
   if (analyzing && !analysis) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center space-y-8 sentinel-grid relative overflow-hidden rounded-3xl border border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-        <div className="relative">
-          <div className="w-40 h-40 rounded-full border-4 border-primary/10 animate-[spin_4s_linear_infinite]" />
-          <div className="w-40 h-40 rounded-full border-t-4 border-primary absolute inset-0 animate-spin" />
-          <Activity className="w-16 h-16 text-primary absolute inset-0 m-auto animate-pulse" />
-
-          {/* Scanning line effect */}
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/40 blur-sm animate-[scan_2s_ease-in-out_infinite]" />
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-6">
+        <div className="relative w-24 h-24">
+          <div className="w-24 h-24 rounded-full border-4 border-primary/20 animate-pulse absolute" />
+          <div className="w-24 h-24 rounded-full border-t-4 border-primary animate-spin absolute" />
+          <Activity className="w-8 h-8 text-primary absolute inset-0 m-auto" />
         </div>
-        <div className="text-center space-y-4 relative z-10">
-          <h2 className="text-2xl font-black text-white tracking-[0.3em] uppercase animate-pulse">
-            {loadingSteps[loadingStep]}
-          </h2>
-          <div className="flex items-center justify-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
-            <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
-          </div>
-          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs mx-auto opacity-60">
-            Real-time Financial Vital Sign Audit in Progress
-          </p>
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-white">Scanning your finances…</h2>
+          <p className="text-gray-400 text-sm mt-1">This takes just a moment</p>
         </div>
       </div>
     );
   }
 
+  // ── Main Screen ────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Debt Pulse Monitor"
-        subtitle="High-fidelity AI forecasting of debt trap vectors and financial vital sign monitoring."
-      />
 
-      {/* Heartbeat Header */}
-      <div className="sentinel-border glow-blue rounded-3xl overflow-hidden">
-        <div className="relative h-28 bg-black/40 backdrop-blur-2xl flex items-center justify-between px-10">
-          <div className="absolute inset-x-0 bottom-0 h-20 opacity-30">
-            <svg className="w-full h-full stroke-emerald-500" viewBox="0 0 1000 100" fill="none" preserveAspectRatio="none">
-              <path d="M0,50 L200,50 L210,20 L220,80 L230,50 L400,50 L410,20 L420,80 L430,50 L600,50 L610,20 L620,80 L630,50 L1000,50" strokeWidth="1" className="animate-pulse" />
-            </svg>
-          </div>
+      {/* ── Page Title + Refresh ─────────────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <PageHeader title="Arth Pulse" subtitle="Your personal financial health report" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchAnalysis}
+          disabled={analyzing}
+          className="border-white/10 text-gray-400 hover:text-white hover:bg-white/5"
+        >
+          {analyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+          {!analyzing && "Refresh"}
+        </Button>
+      </div>
 
-          <div className="relative z-10 flex items-center gap-6">
-            <div className={cn(
-              "p-4 rounded-2xl relative",
-              analysis?.status === 'DANGER' ? 'bg-rose-500/20 text-rose-500' : 'bg-emerald-500/20 text-emerald-500'
-            )}>
-              <div className="absolute inset-0 rounded-2xl bg-current opacity-20 animate-ping" />
-              <Activity className="w-8 h-8 relative z-10" />
+      {/* ── Hero Score Card ───────────────────────────────────────────────── */}
+      <GlassCard className={`p-6 border ${cfg.border} relative overflow-hidden`}>
+        {/* subtle glow blob */}
+        <div className={`absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-10 blur-3xl ${status === "SAFE" ? "bg-emerald-500" : status === "WARNING" ? "bg-amber-500" : "bg-rose-500"
+          }`} />
+
+        <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+
+          {/* Score Ring */}
+          <div className="flex-shrink-0 flex items-center gap-5">
+            <div className={`relative w-24 h-24 rounded-full border-4 ${cfg.ring} flex items-center justify-center`}
+              style={{ boxShadow: `0 0 24px ${scoreColor}33` }}>
+              <div className="text-center">
+                <span className="text-3xl font-black text-white leading-none">{score}</span>
+                <span className="block text-[10px] text-gray-400 mt-0.5">/ 100</span>
+              </div>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-1">Sentinel Guardian Status</p>
-              <h2 className="text-3xl font-black text-white tracking-widest uppercase italic">
-                {analysis?.status === 'SAFE' ? 'Protocol: Optimal' : analysis?.status === 'WARNING' ? 'Protocol: Elevated Risk' : 'Protocol: Critical Breach'}
-              </h2>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center gap-8 relative z-10 border-l border-white/5 pl-8">
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Scanning Frequency</p>
-              <p className="text-white font-bold tabular-nums">1.2ms Real-time</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">AI Trust Score</p>
-              <p className="text-emerald-400 font-bold tabular-nums">99.8%</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Row 1: Three Equal Cards */}
-        <div className={cn(
-          "sentinel-border rounded-3xl overflow-hidden",
-          analysis?.status === 'DANGER' ? 'glow-rose' : analysis?.status === 'WARNING' ? 'glow-amber' : 'glow-emerald'
-        )}>
-          <GlassCard className={cn(
-            "p-8 h-full flex flex-col items-center justify-center text-center relative overflow-hidden",
-            analysis?.status === 'DANGER' ? 'bg-rose-950/20' : analysis?.status === 'WARNING' ? 'bg-amber-950/20' : 'bg-emerald-950/20'
-          )}>
-            <div className="absolute top-0 right-0 p-6 opacity-5">
-              <Sparkles className="w-24 h-24" />
-            </div>
-            <h3 className="text-[10px] font-black text-gray-500 tracking-[0.3em] uppercase mb-6">Trap Forecast Velocity</h3>
-            <div className="relative">
-              <h1 className={cn(
-                "text-7xl font-black tracking-tighter tabular-nums italic",
-                analysis?.status === 'DANGER' ? 'text-rose-500' : analysis?.status === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'
-              )}>
-                {analysis?.debt_trap_days ? `${analysis.debt_trap_days}D` : 'CLEAN'}
-              </h1>
-              <p className="text-gray-500 mt-6 font-black uppercase tracking-[0.15em] text-[10px] px-4 max-w-[200px] mx-auto leading-relaxed">
-                Critical EMI Threshold Proximity Monitor
+              <span className={`text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color} border ${cfg.border}`}>
+                {cfg.label}
+              </span>
+              <h2 className="text-xl font-bold text-white mt-2">Financial Health Score</h2>
+              <p className="text-gray-400 text-sm">
+                {score > 70
+                  ? "You're managing money well. Keep it up!"
+                  : score > 40
+                    ? "A few tweaks can improve your score quickly."
+                    : "Act now — your finances need urgent attention."}
               </p>
             </div>
-          </GlassCard>
-        </div>
-
-        {/* Risk Indicators */}
-        <div className="sentinel-border glow-blue rounded-3xl overflow-hidden">
-          <GlassCard className="p-8 space-y-8 flex flex-col justify-center h-full">
-            <h3 className="text-[10px] font-black text-gray-500 tracking-[0.3em] uppercase">Vulnerability Vectors</h3>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">EMI Liquidity Ratio</span>
-                <span className={cn(
-                  "text-xl font-black tabular-nums italic",
-                  (analysis?.emi_to_income_ratio || 0) > 40 ? 'text-rose-400' : 'text-emerald-400'
-                )}>
-                  {analysis?.emi_to_income_ratio || 0}%
-                </span>
-              </div>
-              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <div className={cn(
-                  "h-full transition-all duration-1000 rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]",
-                  (analysis?.emi_to_income_ratio || 0) > 40 ? 'bg-rose-500' : 'bg-emerald-500'
-                )} style={{ width: `${analysis?.emi_to_income_ratio || 0}%` }}></div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-end">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Net Savings Retention</span>
-                <span className={cn(
-                  "text-xl font-black tabular-nums italic",
-                  (analysis?.savings_rate || 0) < 20 ? 'text-rose-400' : 'text-emerald-400'
-                )}>
-                  {analysis?.savings_rate || 0}%
-                </span>
-              </div>
-              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
-                <div className={cn(
-                  "h-full transition-all duration-1000 rounded-full",
-                  (analysis?.savings_rate || 0) < 20 ? 'bg-rose-500' : 'bg-emerald-500'
-                )} style={{ width: `${analysis?.savings_rate || 0}%` }}></div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-              <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Stability Profile</span>
-              <div className={cn(
-                "px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border",
-                analysis?.trend === 'DETERIORATING' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' : 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5'
-              )}>
-                {analysis?.trend || 'STABLE PROTOCOL'}
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Health Trend Chart */}
-        <div className="sentinel-border glow-blue rounded-3xl overflow-hidden">
-          <GlassCard className="p-8 flex flex-col justify-center h-full">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="text-[10px] font-black text-gray-500 tracking-[0.3em] uppercase">Vitality Trajectory</h3>
-              <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
-                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Projection Mode</span>
-                <Switch checked={showScenario} onCheckedChange={setShowScenario} className="data-[state=checked]:bg-primary" />
-              </div>
-            </div>
-            <div className="h-[180px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={healthTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                  <XAxis dataKey="month" stroke="#4B5563" fontSize={10} axisLine={false} tickLine={false} dy={10} />
-                  <YAxis domain={[0, 100]} stroke="#4B5563" hide />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#0A0F1E', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
-                    itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke={analysis?.status === 'DANGER' ? "#EF4444" : "#3B82F6"}
-                    strokeWidth={4}
-                    dot={{ r: 4, fill: analysis?.status === 'DANGER' ? "#EF4444" : "#3B82F6", strokeWidth: 0 }}
-                    activeDot={{ r: 6, strokeWidth: 0 }}
-                  />
-                  {showScenario && (
-                    <Line type="monotone" data={[...healthTrend, { month: 'Forecast', score: 45 }]} dataKey="score" stroke="#EF4444" strokeWidth={2} strokeDasharray="5 5" />
-                  )}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </GlassCard>
-        </div>
-      </div>
-
-      {/* AI Prescription - Sentinel Strategic Directives */}
-      {analysis?.prescription && (
-        <div className="space-y-6 mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="flex items-center gap-4 px-2">
-            <div className="h-[2px] w-12 bg-primary rounded-full" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-primary">Sentinel Strategic Directives</h2>
           </div>
 
-          {/* Header Section */}
-          <div className="sentinel-border glow-emerald rounded-3xl overflow-hidden">
-            <GlassCard className="p-10 border-l-4 border-l-emerald-500 bg-emerald-500/[0.02]">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-                <div className="flex items-start gap-6">
-                  <div className="p-5 bg-emerald-500/20 rounded-2xl flex-shrink-0 animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                    <AlertOctagon className="w-8 h-8 text-emerald-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic mb-3">
-                      Master Optimization Plan
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed max-w-2xl font-medium">
-                      {analysis.scenario_if_no_action || "Your financial health is currently stable. Follow these AI-curated steps to further optimize your savings and bulletproof your future from debt traps."}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleApply}
-                  disabled={isApplying}
-                  className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest px-10 h-14 rounded-2xl shadow-2xl shadow-primary/20 flex-shrink-0 transition-all active:scale-95"
-                >
-                  {isApplying ? <Loader2 className="animate-spin mr-3" /> : <Zap className="w-5 h-5 mr-3" />}
-                  {isApplying ? "Syncing Logic..." : "Execute Strategy"}
-                </Button>
-              </div>
-            </GlassCard>
-          </div>
-
-          {/* Action Steps Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {(analysis.prescription || []).map((step: any, i: number) => (
-              <div key={i} className="sentinel-border glow-blue rounded-3xl overflow-hidden group">
-                <GlassCard className="p-8 h-full transition-all group-hover:bg-white/[0.08] relative overflow-hidden">
-                  {/* Background Effect */}
-                  <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-5 transition-opacity duration-500 translate-x-4 translate-y--4 group-hover:translate-x-0 group-hover:translate-y-0">
-                    <CheckCircle className="w-32 h-32 text-emerald-500" />
-                  </div>
-
-                  <div className="relative z-10 space-y-6">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-md border border-emerald-500/20">
-                        Directive {i + 1}
-                      </span>
-                      <span className={cn(
-                        "text-[10px] font-black uppercase tracking-[0.2em] border px-3 py-1.5 rounded-md shadow-sm",
-                        step.priority === 'HIGH'
-                          ? "text-rose-400 border-rose-500/30 bg-rose-500/10"
-                          : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
-                      )}>
-                        {step.priority} PRIORITY
-                      </span>
-                    </div>
-
-                    <p className="text-white font-black text-xl leading-snug group-hover:text-primary transition-colors italic tracking-tight">
-                      {step.action}
-                    </p>
-
-                    <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-inner">
-                          <DollarSign className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">
-                            Retention Delta
-                          </p>
-                          <p className="text-emerald-400 font-black text-2xl tabular-nums italic">
-                            +₹{step.monthly_saving.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="p-3 rounded-full bg-white/5 group-hover:bg-primary/20 transition-all border border-white/5 group-hover:border-primary/30">
-                        <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-primary transition-colors" />
-                      </div>
-                    </div>
-                  </div>
-                </GlassCard>
+          {/* Quick stats strip */}
+          <div className="flex-1 grid grid-cols-3 gap-3 md:gap-4">
+            {[
+              { label: "EMI Burden", value: `${emiRatio}%`, sub: emiRatio > 40 ? "Too high" : "Healthy", ok: emiRatio <= 40 },
+              { label: "Savings Rate", value: `${savingsRate}%`, sub: savingsRate < 20 ? "Low" : "Good", ok: savingsRate >= 20 },
+              {
+                label: "Debt Risk", value: analysis?.debt_trap_days ? `${analysis.debt_trap_days}d` : "Safe",
+                sub: analysis?.debt_trap_days ? "Days to risk" : "No danger",
+                ok: !analysis?.debt_trap_days
+              },
+            ].map((item) => (
+              <div key={item.label} className="bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                <p className={`text-lg font-bold ${item.ok ? "text-emerald-400" : "text-rose-400"}`}>{item.value}</p>
+                <p className="text-white text-xs font-medium mt-0.5">{item.label}</p>
+                <p className={`text-[10px] mt-0.5 ${item.ok ? "text-emerald-500/70" : "text-rose-500/70"}`}>{item.sub}</p>
               </div>
             ))}
           </div>
+
         </div>
+      </GlassCard>
+
+      {/* ── Middle Row: Trend + What These Numbers Mean ───────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {/* Health Trend Chart */}
+        <GlassCard className="p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-white font-semibold">Score Trend</h3>
+            <span className={`flex items-center gap-1 text-xs font-medium ${score > (healthTrend[0].score) ? "text-emerald-400" : "text-rose-400"}`}>
+              {score > healthTrend[0].score
+                ? <TrendingUp className="w-3.5 h-3.5" />
+                : <TrendingDown className="w-3.5 h-3.5" />}
+              {Math.abs(score - healthTrend[0].score)} pts this quarter
+            </span>
+          </div>
+          <div className="h-36">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={healthTrend}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                <XAxis dataKey="month" stroke="#6B7280" fontSize={11} tickLine={false} />
+                <YAxis domain={[0, 100]} stroke="#6B7280" fontSize={11} tickLine={false} width={28} />
+                <ReferenceLine y={70} stroke="#10B98133" strokeDasharray="4 4" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#0A0F1E", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#9CA3AF", fontSize: 11 }}
+                  formatter={(v: any) => [`${v} pts`, "Score"]}
+                />
+                <Line type="monotone" dataKey="score" stroke={scoreColor} strokeWidth={2.5}
+                  dot={{ r: 4, fill: scoreColor, strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: scoreColor }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-[11px] text-gray-500 mt-2">Dashed line = healthy score (70+)</p>
+        </GlassCard>
+
+        {/* What Does This Mean — plain language */}
+        <GlassCard className="p-6">
+          <h3 className="text-white font-semibold mb-4">What This Means For You</h3>
+          <div className="space-y-3">
+            {[
+              {
+                icon: IndianRupee,
+                title: "EMI is " + (emiRatio > 40 ? "eating too much of your income" : "under control"),
+                detail: emiRatio > 40
+                  ? `₹${emiRatio} of every ₹100 earned goes to EMIs. Ideally keep it below ₹40.`
+                  : "Your EMI payments are within the safe limit. Good discipline!",
+                ok: emiRatio <= 40
+              },
+              {
+                icon: TrendingUp,
+                title: "You save " + (savingsRate < 20 ? "less than the recommended 20%" : savingsRate + "% of your income"),
+                detail: savingsRate < 20
+                  ? "Try to save at least ₹20 for every ₹100 you earn. Even small increases help."
+                  : "You're meeting the 20% savings benchmark. Keep this habit going.",
+                ok: savingsRate >= 20
+              },
+              {
+                icon: ShieldCheck,
+                title: analysis?.debt_trap_days ? "Debt trap risk in " + analysis.debt_trap_days + " days" : "No debt trap risk right now",
+                detail: analysis?.debt_trap_days
+                  ? "At current spending, you may struggle with repayments soon. Review expenses."
+                  : "Your income vs. debt ratio is balanced. No immediate danger.",
+                ok: !analysis?.debt_trap_days
+              }
+            ].map((item, i) => (
+              <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${item.ok ? "bg-emerald-500/5 border-emerald-500/15" : "bg-rose-500/5 border-rose-500/15"
+                }`}>
+                <div className={`p-2 rounded-lg flex-shrink-0 ${item.ok ? "bg-emerald-500/15" : "bg-rose-500/15"}`}>
+                  <item.icon className={`w-4 h-4 ${item.ok ? "text-emerald-400" : "text-rose-400"}`} />
+                </div>
+                <div>
+                  <p className="text-white text-sm font-medium">{item.title}</p>
+                  <p className="text-gray-400 text-xs mt-0.5 leading-relaxed">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* ── AI Prescription ───────────────────────────────────────────────── */}
+      {analysis?.prescription && analysis.prescription.length > 0 && (
+        <GlassCard className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-white">What You Should Do Next</h3>
+              <p className="text-gray-400 text-sm mt-1 max-w-lg">
+                {analysis.scenario_if_no_action || "Follow these steps to strengthen your financial health."}
+              </p>
+            </div>
+            <Button
+              onClick={handleApply}
+              disabled={isApplying}
+              className="bg-primary hover:bg-primary/90 text-white flex-shrink-0 shadow-[0_4px_20px_-5px_rgba(59,130,246,0.5)]"
+            >
+              {isApplying ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+              {isApplying ? "Applying…" : "Apply This Plan"}
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(analysis.prescription || []).slice(0, 4).map((step: any, i: number) => (
+              <div key={i}
+                className="group flex items-start gap-4 border border-white/8 rounded-xl p-4 hover:border-primary/40 hover:bg-white/[0.03] transition-all duration-200">
+                <div className="w-9 h-9 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:bg-primary/25 transition-colors">
+                  <span className="text-primary font-bold text-sm">{i + 1}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm leading-snug">{step.action || "Action Required"}</p>
+                  <div className="flex items-center justify-between mt-2.5 gap-2">
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${step.priority === "HIGH"
+                      ? "bg-rose-500/15 text-rose-400 border border-rose-500/20"
+                      : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                      }`}>
+                      {step.priority === "HIGH" ? "High Priority" : "Recommended"}
+                    </span>
+                    {step.monthly_saving > 0 && (
+                      <span className="text-emerald-400 font-bold text-xs flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" />
+                        ₹{(step.monthly_saving || 0).toLocaleString()}/mo saved
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-primary flex-shrink-0 mt-1 transition-colors" />
+              </div>
+            ))}
+          </div>
+        </GlassCard>
       )}
+
+      {/* ── Bottom Banner if SAFE ─────────────────────────────────────────── */}
+      {status === "SAFE" && !analysis?.prescription?.length && (
+        <GlassCard className="p-5 border border-emerald-500/20 bg-emerald-500/5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-full bg-emerald-500/15">
+              <ShieldCheck className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold">You're on track! 🎉</p>
+              <p className="text-gray-400 text-sm">Your finances look healthy. Keep tracking expenses to maintain this score.</p>
+            </div>
+          </div>
+        </GlassCard>
+      )}
+
     </div>
   );
 }
