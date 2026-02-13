@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 export default function Settings() {
-    const { user, setUser } = useArthStore();
+    const { user, setUser, logout } = useArthStore();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: user?.name || "",
@@ -40,9 +40,7 @@ export default function Settings() {
     };
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        setUser(null);
-        setLocation("/");
+        logout();
         toast({ title: "Logged Out", description: "Session cleared successfully." });
     };
 

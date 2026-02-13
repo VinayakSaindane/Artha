@@ -17,9 +17,16 @@ interface ArthState {
 }
 
 export const useArthStore = create<ArthState>((set) => ({
-    user: null,
+    user: JSON.parse(localStorage.getItem('user') || 'null'),
     token: localStorage.getItem('token'),
-    setUser: (user: User | null) => set({ user }),
+    setUser: (user: User | null) => {
+        if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('user');
+        }
+        set({ user });
+    },
     setToken: (token: string | null) => {
         if (token) {
             localStorage.setItem('token', token);
@@ -30,6 +37,8 @@ export const useArthStore = create<ArthState>((set) => ({
     },
     logout: () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         set({ user: null, token: null });
+        window.location.href = "/";
     },
 }));
