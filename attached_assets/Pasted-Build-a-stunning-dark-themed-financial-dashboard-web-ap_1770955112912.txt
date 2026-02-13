@@ -1,0 +1,79 @@
+Build a stunning dark-themed financial dashboard web app called "ARTH" — India's AI Financial Co-Pilot.
+
+DESIGN LANGUAGE:
+- Dark navy background (#0A0F1E) with electric blue (#3B82F6) and emerald green (#10B981) accents
+- Premium glassmorphism cards with subtle borders (rgba(255,255,255,0.05))
+- Outfit font for headings, DM Sans for body
+- Smooth sidebar navigation with icons
+- Subtle animated gradient blobs in background
+- Mobile responsive
+
+PAGES TO BUILD:
+
+1. LANDING / LOGIN PAGE
+- Large hero: "Your Money. Your Future. Your ARTH."
+- Subtext: "India's first AI co-pilot that tracks, protects, predicts and plans your entire financial life"
+- Two CTA buttons: "Get Started Free" and "See How It Works"
+- 5 feature pills below hero: Track | Shield | Score | Goals | Pulse
+- Clean login form card with email/password and Google sign-in button
+
+2. MAIN DASHBOARD (after login)
+- Top greeting: "Namaste, Rahul 👋 Your financial health is 74/100"
+- Health score ring chart (large, center-top)
+- 4 stat cards in a row: Monthly Income ₹45,000 | Expenses ₹28,400 | Savings ₹16,600 | Debt Risk: Low
+- Recent transactions list (last 5, with category icons)
+- Quick action buttons: + Add Expense | Scan Agreement | Check Loan Score | View Goals
+- Bottom: "Arth Pulse Alert" banner in amber — "⚠️ Your EMI ratio will hit 48% in 60 days"
+
+3. ARTH TRACK PAGE (Expense Tracker)
+- Monthly expense donut chart (categories: Food, Transport, EMI, Entertainment, Health)
+- Expense list with search and filter
+- Add expense modal: amount, category, voice input button (mic icon)
+- Budget vs actual bar chart for each category
+- Tip card: "You spent 34% more on food this month than last month"
+
+4. ARTH SHIELD PAGE (Agreement Analyzer)
+- Large drag-and-drop zone: "Drop your agreement PDF or paste text here"
+- Paste text textarea below
+- "Analyze with AI" button (electric blue, prominent)
+- Results section (show after analysis):
+  * Risk Score badge: HIGH / MEDIUM / LOW
+  * List of flagged clauses with red/yellow/green color coding
+  * Each flag shows: Clause text | Issue | RBI Guideline violated | Suggested fix
+  * Download Report button
+
+5. ARTH SCORE PAGE (Loan Predictor)
+- Form with sliders and inputs:
+  * Monthly Income
+  * Existing EMIs
+  * Credit Score (slider 300-900)
+  * Loan Amount Requested
+  * Employment Type (dropdown)
+  * Loan Purpose (dropdown)
+- Big "Predict My Approval" button
+- Result card: Approval Probability % with a gauge chart
+- 3 improvement tips shown below result
+- "Banks likely to approve" section with 3 bank logos/names
+
+6. ARTH GOALS PAGE (Retirement & Savings Planner)  
+- Current age and retirement age sliders
+- Monthly savings input
+- Goal cards: Retirement Fund | Child Education | Emergency Fund | Home Down Payment
+- Timeline chart showing projected corpus growth
+- AI recommendation card: "To retire at 55 with ₹2Cr, increase SIP by ₹3,200/month"
+
+7. ARTH PULSE PAGE (Debt Trap Predictor — THE INNOVATION)
+- Animated pulse/heartbeat line at top (like ECG for finances)
+- Financial Health Timeline: last 6 months trend
+- Big center display: "DEBT TRAP IN: 73 DAYS" (in red if danger, green if safe)
+- 3 risk indicators: EMI Ratio | Savings Rate | Expense Growth Rate
+- AI Prescription card: specific actions to avoid the trap
+- "What happens if I don't act?" scenario toggle
+
+SIDEBAR NAVIGATION:
+- Logo: "ARTH ₳" in electric blue
+- Nav items with icons: Dashboard | Track | Shield | Score | Goals | Pulse | Settings
+- Bottom: User avatar, name, logout button
+
+OVERALL FEEL:
+Think Bloomberg Terminal meets consumer fintech. Dark, data-rich, premium but approachable. Every page should feel like a command center. Use recharts or similar for all charts. Add loading skeletons. Make it feel fast and alive.
