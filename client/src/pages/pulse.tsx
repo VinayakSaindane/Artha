@@ -34,14 +34,10 @@ export default function Pulse() {
     }
   };
 
-  const healthTrend = [
-    { month: 'Sep', score: 85 },
-    { month: 'Oct', score: 82 },
-    { month: 'Nov', score: 78 },
-    { month: 'Dec', score: 75 },
-    { month: 'Jan', score: 74 },
-    { month: 'Feb', score: analysis?.health_score || 72 },
-  ];
+  const healthTrend = analysis ? [
+    { month: 'Trending', score: analysis.health_score },
+    { month: 'Current', score: analysis.health_score },
+  ] : [];
 
   if (analyzing && !analysis) {
     return (

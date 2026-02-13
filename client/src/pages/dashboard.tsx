@@ -36,28 +36,38 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [expensesRes, summaryRes, pulseRes] = await Promise.all([
-        expensesApi.getExpenses(),
+      // Fetch expenses (Core data)
+      const expensesRes = await expensesApi.getExpenses();
+      setRecentExpenses(expensesRes.data.slice(0, 4));
+
+      // Fetch summary and pulse in parallel
+      const [summaryRes, pulseRes] = await Promise.allSettled([
         expensesApi.getSummary(),
         pulseApi.analyze()
       ]);
-      setRecentExpenses(expensesRes.data.slice(-4).reverse());
-      setPulse(pulseRes.data);
 
-      const totalExpenses = summaryRes.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+      let totalExpenses = 0;
+      if (summaryRes.status === 'fulfilled') {
+        totalExpenses = summaryRes.value.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+      }
+
+      if (pulseRes.status === 'fulfilled') {
+        setPulse(pulseRes.value.data);
+      }
+
       setStats({
-        income: user?.monthly_income || 45000,
+        income: user?.monthly_income || 0,
         expenses: totalExpenses,
-        savings: (user?.monthly_income || 45000) - totalExpenses
+        savings: (user?.monthly_income || 0) - totalExpenses
       });
     } catch (error) {
-      console.error("Failed to fetch dashboard data");
+      console.error("Failed to fetch dashboard data", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const healthScore = pulse?.health_score || 74;
+  const healthScore = pulse?.health_score || 0;
 
   const healthData = [
     { name: "Score", value: healthScore },
@@ -85,7 +95,7 @@ export default function Dashboard() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Namaste, {user?.name || 'Rahul'} 👋</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Namaste, {user?.name || 'User'} 👋</h1>
           <p className="text-gray-400 mt-1">Here's what's happening with your money today.</p>
         </div>
 

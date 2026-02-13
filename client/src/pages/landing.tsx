@@ -15,6 +15,8 @@ export default function Landing() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [income, setIncome] = useState("");
+  const [age, setAge] = useState("");
   const [, setLocation] = useLocation();
   const { setToken, setUser } = useArthStore();
   const { toast } = useToast();
@@ -31,7 +33,13 @@ export default function Landing() {
         setUser(userRes.data);
         toast({ title: "Login Successful", description: `Welcome back, ${userRes.data.name}!` });
       } else {
-        const response = await authApi.register({ email, password, name });
+        const response = await authApi.register({
+          email,
+          password,
+          name,
+          monthly_income: parseFloat(income),
+          age: parseInt(age)
+        });
         setToken(response.data.access_token);
         const userRes = await authApi.getMe();
         setUser(userRes.data);
@@ -126,15 +134,39 @@ export default function Landing() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Full Name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Input
+                        placeholder="Full Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Input
+                          type="number"
+                          placeholder="Monthly Income"
+                          value={income}
+                          onChange={(e) => setIncome(e.target.value)}
+                          required
+                          className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Input
+                          type="number"
+                          placeholder="Age"
+                          value={age}
+                          onChange={(e) => setAge(e.target.value)}
+                          required
+                          className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
                 <div className="space-y-2">
                   <Input

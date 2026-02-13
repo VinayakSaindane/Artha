@@ -1,12 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { 
-  LayoutDashboard, 
-  PieChart, 
-  ShieldCheck, 
-  CreditCard, 
-  Target, 
-  Activity, 
-  Settings, 
+import {
+  LayoutDashboard,
+  PieChart,
+  ShieldCheck,
+  CreditCard,
+  Target,
+  Activity,
+  Settings,
   Menu,
   LogOut,
   User
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useArthStore } from "@/store/useArthStore";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { user, logout } = useArthStore();
 
   // Don't show layout on landing page
   if (location === "/") return <>{children}</>;
@@ -66,14 +68,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
           <Avatar className="w-10 h-10 border border-white/10">
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>RD</AvatarFallback>
+            <AvatarImage src="" />
+            <AvatarFallback>{user?.name?.[0] || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">Rahul D.</p>
+            <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
             <p className="text-xs text-gray-400 truncate">Premium Plan</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={() => window.location.href = '/'}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={logout}>
             <LogOut className="w-4 h-4" />
           </Button>
         </div>

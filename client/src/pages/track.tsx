@@ -6,11 +6,17 @@ import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
 import { useState, useEffect } from "react";
 import { expensesApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useArthStore } from "@/store/useArthStore";
 
 export default function Track() {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [summary, setSummary] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [newExpense, setNewExpense] = useState({ amount: "", category: "Food", description: "" });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -37,6 +43,22 @@ export default function Track() {
     }
   };
 
+  const handleAddExpense = async () => {
+    if (!newExpense.amount) return;
+    try {
+      await expensesApi.createExpense({
+        ...newExpense,
+        amount: parseFloat(newExpense.amount)
+      });
+      toast({ title: "Expense Added", description: "Your expense has been logged." });
+      setIsDialogOpen(false);
+      setNewExpense({ amount: "", category: "Food", description: "" });
+      fetchData();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add expense.", variant: "destructive" });
+    }
+  };
+
   const CATEGORY_COLORS: any = {
     Food: "#3B82F6",
     Transport: "#10B981",
@@ -52,11 +74,22 @@ export default function Track() {
     color: CATEGORY_COLORS[s.category] || CATEGORY_COLORS.Other
   }));
 
-  const budgetData = summary.map(s => ({
-    category: s.category,
-    budget: 10000, // Placeholder
-    actual: s.total_amount
-  }));
+  const { user } = useArthStore();
+  const income = user?.monthly_income || 50000;
+
+  const budgetData = summary.map(s => {
+    // Basic 50/30/20 rule inspired logic
+    let budgetFactor = 0.1; // Default 10%
+    if (s.category === 'Food') budgetFactor = 0.15;
+    if (s.category === 'Transport') budgetFactor = 0.05;
+    if (s.category === 'EMI') budgetFactor = 0.35;
+
+    return {
+      category: s.category,
+      budget: income * budgetFactor,
+      actual: s.total_amount
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -76,9 +109,57 @@ export default function Track() {
           <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border border-white/10">
             <Mic className="w-4 h-4 mr-2" /> Voice Add
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 text-white">
-            + Add Expense
-          </Button>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90 text-white">
+                + Add Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">
+              <DialogHeader>
+                <DialogTitle>Add New Expense</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Amount (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="500"
+                    value={newExpense.amount}
+                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={newExpense.category}
+                    onValueChange={(val) => setNewExpense({ ...newExpense, category: val })}
+                  >
+                    <SelectTrigger className="bg-black/40 border-white/10">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0D1425] border-white/10 text-white">
+                      {Object.keys(CATEGORY_COLORS).map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input
+                    placeholder="e.g. Dinner at Taj"
+                    value={newExpense.description}
+                    onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <Button onClick={handleAddExpense} className="w-full bg-primary">Save Expense</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </GlassCard>
 
