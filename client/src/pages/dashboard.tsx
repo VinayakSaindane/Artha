@@ -36,7 +36,11 @@ import { Button } from "@/components/ui/button";
 export default function Dashboard() {
   const { user } = useArthStore();
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<any>({
+    income: user?.monthly_income || 50000,
+    expenses: 0,
+    savings: user?.monthly_income || 50000
+  });
   const [pulse, setPulse] = useState<any>(null);
   const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
   const [festivals, setFestivals] = useState<any[]>([]);
@@ -172,7 +176,7 @@ export default function Dashboard() {
     { name: "Remaining", value: 100 - healthScore }
   ];
 
-  if (loading && !stats) {
+  if (loading) {
     return (
       <div className="h-96 flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-primary animate-spin" />
@@ -336,7 +340,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400 text-sm font-medium">Total Balance</p>
-              <h3 className="text-3xl font-bold text-white mt-1">₹{stats.savings.toLocaleString()}</h3>
+              <h3 className="text-3xl font-bold text-white mt-1">₹{(stats?.savings || 0).toLocaleString()}</h3>
             </div>
             <div className="p-3 bg-primary/20 rounded-xl">
               <CreditCard className="w-6 h-6 text-primary" />

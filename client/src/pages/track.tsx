@@ -148,21 +148,21 @@ export default function Track() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Expense Tracker" subtitle="Monitor your spending patterns in real-time" />
+      <PageHeader title="Real-time Wealth Auditing" subtitle="Active monitoring of every cash-flow vector in your ecosystem." />
 
-      <GlassCard className="p-4 flex flex-wrap gap-4 items-center justify-between">
+      <GlassCard className="p-4 flex flex-wrap gap-4 items-center justify-between sentinel-border glow-blue">
         <div className="flex items-center gap-2 flex-1 min-w-[300px]">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <Input
-              className="pl-9 bg-black/20 border-white/10 text-white placeholder:text-gray-500"
-              placeholder="Search expenses..."
+              className="pl-9 bg-black/40 border-white/10 text-white placeholder:text-gray-600 rounded-xl"
+              placeholder="Search audit logs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-40 bg-black/20 border-white/10 text-white">
+            <SelectTrigger className="w-44 bg-black/40 border-white/10 text-white rounded-xl">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent className="bg-[#0D1425] border-white/10 text-white">
@@ -173,53 +173,53 @@ export default function Track() {
             </SelectContent>
           </Select>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
             variant="secondary"
-            className={cn("bg-white/10 hover:bg-white/20 text-white border border-white/10", isVoiceActive && "animate-pulse border-primary")}
+            className={cn("h-10 px-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all", isVoiceActive && "animate-pulse border-primary glow-blue")}
             onClick={handleVoiceAdd}
           >
-            <Mic className={cn("w-4 h-4 mr-2", isVoiceActive && "text-primary")} /> {isVoiceActive ? "Listening..." : "Voice Add"}
+            <Mic className={cn("w-4 h-4 mr-2", isVoiceActive && "text-primary")} /> {isVoiceActive ? "Listening Signal..." : "Voice Audio Sync"}
           </Button>
 
           <Dialog open={isLimitsOpen} onOpenChange={setIsLimitsOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="border-white/10 text-gray-300">
-                <Settings2 className="w-4 h-4 mr-2" /> Manage Limits
+              <Button variant="outline" className="h-10 px-6 border-white/10 text-gray-400 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/5">
+                <Settings2 className="w-4 h-4 mr-2" /> Protocol Limits
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white max-w-md">
+            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white max-w-md sentinel-border">
               <DialogHeader>
-                <DialogTitle>Category Expenditure Limits</DialogTitle>
+                <DialogTitle className="text-xl font-black italic uppercase italic tracking-tighter">Expenditure Thresholds</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
                 {Object.keys(CATEGORY_COLORS).map(cat => (
-                  <div key={cat} className="flex items-center justify-between gap-4 p-3 bg-white/5 rounded-xl border border-white/5">
+                  <div key={cat} className="flex items-center justify-between gap-4 p-3 bg-white/[0.02] rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[cat] }} />
-                      <span className="text-sm font-medium">{cat}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{cat}</span>
                     </div>
                     <div className="relative w-32">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">₹</span>
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-600">₹</span>
                       <Input
                         type="number"
                         placeholder="Limit"
                         defaultValue={categoryLimits[cat] || Math.round(income * (cat === 'EMI' ? 0.35 : cat === 'Food' ? 0.15 : 0.1))}
-                        className="h-8 pl-5 bg-black/40 border-white/10 text-xs"
+                        className="h-8 pl-5 bg-black/60 border-white/10 text-xs rounded-lg"
                         onBlur={(e) => handleUpdateLimits(cat, e.target.value)}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-              <Button onClick={() => setIsLimitsOpen(false)} className="w-full bg-primary mt-2">Finish Setup</Button>
+              <Button onClick={() => setIsLimitsOpen(false)} className="w-full bg-primary font-black uppercase tracking-widest h-12 rounded-xl mt-2">Lock Configuration</Button>
             </DialogContent>
           </Dialog>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 text-white">
-                + Add Expense
+              <Button className="h-10 px-8 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-95">
+                + Manual Sync
               </Button>
             </DialogTrigger>
             <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">

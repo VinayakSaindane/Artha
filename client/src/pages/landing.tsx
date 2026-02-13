@@ -126,15 +126,16 @@ export default function Landing() {
         </div>
 
         {/* Auth Card */}
-        <div className="lg:pl-12">
-          <Card className="bg-white/5 border-white/10 backdrop-blur-xl shadow-2xl p-2">
-            <CardContent className="p-8 space-y-6">
+        <div className="relative animate-in fade-in zoom-in duration-700">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-500 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <Card className="relative bg-[#0A0F1E]/80 backdrop-blur-2xl border-white/10 rounded-3xl p-4 sentinel-border">
+            <CardContent className="space-y-8 pt-6">
               <div className="text-center space-y-2">
-                <h3 className="text-2xl font-bold text-white">
-                  {isLogin ? "Welcome Back" : "Create Account"}
-                </h3>
-                <p className="text-gray-400">
-                  {isLogin ? "Enter your details to access your dashboard" : "Join ARTHA and take control of your finances"}
+                <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic">
+                  {isLogin ? "System Login" : "Initialize Sentinel"}
+                </h2>
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">
+                  {isLogin ? "Authenticate to access wealth shield" : "Create your high-fidelity financial profile"}
                 </p>
               </div>
 
@@ -147,7 +148,7 @@ export default function Landing() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                        className="h-12 bg-black/40 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/50 rounded-xl"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -158,7 +159,7 @@ export default function Landing() {
                           value={income}
                           onChange={(e) => setIncome(e.target.value)}
                           required
-                          className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                          className="h-12 bg-black/40 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/50 rounded-xl"
                         />
                       </div>
                       <div className="space-y-2">
@@ -168,7 +169,7 @@ export default function Landing() {
                           value={age}
                           onChange={(e) => setAge(e.target.value)}
                           required
-                          className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                          className="h-12 bg-black/40 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/50 rounded-xl"
                         />
                       </div>
                     </div>
@@ -181,50 +182,54 @@ export default function Landing() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
+                    className="h-12 bg-black/40 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/50 rounded-xl"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="h-12 bg-black/20 border-white/10 text-white placeholder:text-gray-500 focus:border-primary/50"
-                  />
+                  <div className="relative">
+                    <Input
+                      type="password"
+                      placeholder="Secure Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 bg-black/40 border-white/10 text-white placeholder:text-gray-600 focus:border-primary/50 rounded-xl pr-10"
+                    />
+                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600" />
+                  </div>
                 </div>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 text-lg bg-emerald-500 hover:bg-emerald-600 text-white"
+                  className="w-full h-12 text-sm font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xl shadow-primary/20 transition-all active:scale-95"
                 >
                   {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {isLogin ? "Sign In" : "Sign Up"}
+                  {isLogin ? "Secure Entry" : "Activate Protocol"}
                 </Button>
               </form>
 
               <div className="text-center">
                 <button
+                  type="button"
                   onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-primary hover:underline"
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-primary transition-colors"
                 >
-                  {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+                  {isLogin ? "New user? Request Access" : "Existing Sentinel? Authenticate"}
                 </button>
               </div>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10" />
+                  <span className="w-full border-t border-white/5" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-[#0A0F1E] px-2 text-gray-500">Or continue with</span>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em]">
+                  <span className="bg-[#0A0F1E] px-4 text-gray-600">Secure Gateway</span>
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full h-12 border-white/10 text-white hover:bg-white/5">
+              <Button variant="outline" className="w-full h-12 border-white/10 text-gray-400 hover:bg-white/5 hover:text-white rounded-xl font-bold transition-all">
                 <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path></svg>
-                Google
+                Identity Sync
               </Button>
             </CardContent>
           </Card>

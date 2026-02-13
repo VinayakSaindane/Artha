@@ -35,22 +35,39 @@ export default function Advisor() {
         risk_appetite: "moderate"
     });
 
+    const [loadingStep, setLoadingStep] = useState(0);
+    const loadingSteps = [
+        "Initializing Advisor Core...",
+        "Simulating Inflation Scenarios...",
+        "Optimizing Asset Allocation Matrix...",
+        "Projecting Retirement Corpus...",
+        "Encrypting Strategy Output..."
+    ];
+
     const handleAnalyze = async () => {
         setLoading(true);
+        const interval = setInterval(() => {
+            setLoadingStep(prev => (prev + 1) % loadingSteps.length);
+        }, 1200);
+
+        // Tech delay
+        await new Promise(r => setTimeout(r, 4500));
+
         try {
             const response = await advisorApi.getStrategy(inputs);
             setStrategy(response.data);
             toast({
-                title: "Analysis Complete",
-                description: "Your personalized financial roadmap is ready.",
+                title: "Sentinel Strategy Established",
+                description: "Your wealth roadmap has been decrypted.",
             });
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Failed to generate strategy. Using internal engine.",
+                description: "Failed to generate remote strategy.",
                 variant: "destructive",
             });
         } finally {
+            clearInterval(interval);
             setLoading(false);
         }
     };
@@ -198,38 +215,55 @@ export default function Advisor() {
                             <p className="text-gray-400 max-w-sm">Enter your details and let ARTH AI build your retirement roadmap and inflation-adjusted strategy.</p>
                         </GlassCard>
                     ) : loading ? (
-                        <div className="h-full flex flex-col items-center justify-center space-y-6">
+                        <div className="h-[500px] flex flex-col items-center justify-center space-y-10 sentinel-grid relative overflow-hidden rounded-3xl border border-white/5 shadow-2xl">
+                            <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
                             <div className="relative">
-                                <div className="w-24 h-24 rounded-full border-4 border-primary/20 animate-[spin_3s_linear_infinite]" />
-                                <div className="w-24 h-24 rounded-full border-t-4 border-primary absolute inset-0 animate-spin" />
-                                <Brain className="w-10 h-10 text-primary absolute inset-0 m-auto" />
+                                <div className="w-40 h-40 rounded-full border-4 border-primary/10 animate-[spin_6s_linear_infinite]" />
+                                <div className="w-40 h-40 rounded-full border-t-4 border-primary absolute inset-0 animate-spin" />
+                                <Brain className="w-16 h-16 text-primary absolute inset-0 m-auto animate-pulse" />
+
+                                {/* Scanning line effect */}
+                                <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/40 blur-sm animate-[scan_2s_ease-in-out_infinite]" />
                             </div>
-                            <div className="text-center space-y-2">
-                                <h4 className="text-xl font-bold text-white uppercase tracking-widest">Processing Data</h4>
-                                <p className="text-gray-500 text-sm animate-pulse italic">Running 10,000 Monte Carlo simulations...</p>
+                            <div className="text-center space-y-4 relative z-10">
+                                <h2 className="text-2xl font-black text-white tracking-[0.3em] uppercase animate-pulse">
+                                    {loadingSteps[loadingStep]}
+                                </h2>
+                                <div className="flex items-center justify-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
+                                    <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
+                                    <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
+                                </div>
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs mx-auto opacity-70">
+                                    Executing High-Fidelity Financial Wisdom Synthesis
+                                </p>
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                             {/* Top Stats */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <GlassCard className="p-6 border-l-4 border-l-emerald-500">
-                                    <div className="flex justify-between items-start">
-                                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Health Score</p>
-                                        <Zap className="w-4 h-4 text-emerald-500" />
-                                    </div>
-                                    <h2 className="text-4xl font-bold text-white mt-2">{strategy.health_score}<span className="text-lg text-gray-500">/100</span></h2>
-                                    <p className="text-xs text-emerald-500 mt-2 font-medium">Top 15% of your age group</p>
-                                </GlassCard>
+                                <div className="sentinel-border glow-emerald rounded-xl">
+                                    <GlassCard className="p-6 h-full border-l-4 border-l-emerald-500">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Sentinel Health Score</p>
+                                            <Zap className="w-4 h-4 text-emerald-500" />
+                                        </div>
+                                        <h2 className="text-5xl font-black text-white mt-3 tracking-tighter">{strategy.health_score}<span className="text-lg text-gray-600">/100</span></h2>
+                                        <p className="text-[10px] text-emerald-500 mt-3 font-black uppercase tracking-widest">Tier 1 Financial Stability</p>
+                                    </GlassCard>
+                                </div>
 
-                                <GlassCard className="p-6 border-l-4 border-l-blue-500">
-                                    <div className="flex justify-between items-start">
-                                        <p className="text-xs text-gray-400 uppercase font-bold tracking-wider">Savings Rate</p>
-                                        <TrendingUp className="w-4 h-4 text-blue-500" />
-                                    </div>
-                                    <h2 className="text-4xl font-bold text-white mt-2">{(strategy.summary.savings_rate * 100).toFixed(0)}%</h2>
-                                    <p className="text-xs text-gray-500 mt-2">Target: 30% for early retirement</p>
-                                </GlassCard>
+                                <div className="sentinel-border glow-blue rounded-xl">
+                                    <GlassCard className="p-6 h-full border-l-4 border-l-blue-500">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Active Savings Rate</p>
+                                            <TrendingUp className="w-4 h-4 text-blue-500" />
+                                        </div>
+                                        <h2 className="text-5xl font-black text-white mt-3 tracking-tighter">{(strategy.summary.savings_rate * 100).toFixed(0)}%</h2>
+                                        <p className="text-[10px] text-gray-500 mt-3 font-bold uppercase tracking-widest">Optimized for Growth</p>
+                                    </GlassCard>
+                                </div>
 
                                 <GlassCard className="p-6 border-l-4 border-l-amber-500">
                                     <div className="flex justify-between items-start">

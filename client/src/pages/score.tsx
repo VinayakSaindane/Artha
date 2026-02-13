@@ -19,31 +19,47 @@ export default function Score() {
   const [predicting, setPredicting] = useState(false);
   const [prediction, setPrediction] = useState<any>(null);
   const { toast } = useToast();
+  const [loadingStep, setLoadingStep] = useState(0);
+  const loadingSteps = [
+    "Initalizing Risk Analysis...",
+    "Scanning CIBIL History...",
+    "Auditing Debt-to-Equity Ratio...",
+    "Cross-referencing Lender Criteria...",
+    "Computing Approval Vector..."
+  ];
 
   const handlePredict = async () => {
     setPredicting(true);
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev + 1) % loadingSteps.length);
+    }, 1200);
+
+    // Tech feeling delay
+    await new Promise(r => setTimeout(r, 4000));
+
     try {
       const response = await scoreApi.predict({
         income,
         existing_emis: existingEmis,
         credit_score: creditScore[0],
         loan_amount: loanAmount,
-        employment_type: "salaried", // Default
+        employment_type: "salaried",
         loan_purpose: loanPurpose,
-        monthly_expenses: 15000 // Default
+        monthly_expenses: 15000
       });
       setPrediction(response.data);
       toast({
-        title: "Prediction Complete",
-        description: "Your loan approval probability has been calculated.",
+        title: "Sentinel Analysis Complete",
+        description: "Your approval vectors have been established.",
       });
     } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to predict loan approval.",
+        description: "Failed to establish prediction.",
         variant: "destructive",
       });
     } finally {
+      clearInterval(interval);
       setPredicting(false);
     }
   };
@@ -180,7 +196,7 @@ export default function Score() {
                   <div className="absolute inset-0 flex flex-col items-center justify-center -mt-8">
                     <span className="text-4xl font-bold text-white">{prediction.approval_probability}%</span>
                     <span className={`text-xs ${prediction.approval_probability > 70 ? "text-emerald-400" :
-                        prediction.approval_probability > 40 ? "text-amber-400" : "text-rose-400"
+                      prediction.approval_probability > 40 ? "text-amber-400" : "text-rose-400"
                       }`}>{prediction.verdict}</span>
                   </div>
                 </div>

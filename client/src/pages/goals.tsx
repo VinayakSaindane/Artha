@@ -131,13 +131,13 @@ export default function Goals() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <PageHeader title="Goals & Planning" subtitle="Map out your financial journey to freedom" />
+      <div className="flex justify-between items-start">
+        <PageHeader title="Financial Roadmaps" subtitle="Map out your trajectory to terminal wealth and early freedom." />
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white">
-              <Plus className="w-4 h-4 mr-2" /> Add Goal
+            <Button className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-10 px-6 rounded-lg shadow-lg shadow-primary/20 group">
+              <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" /> Add New Directive
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">
