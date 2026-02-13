@@ -48,7 +48,7 @@ export default function Settings() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="Settings" subtitle="Customize your ARTH experience and profile" />
+            <PageHeader title="Settings" subtitle="Customize your ARTHA experience and profile" />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1 space-y-4">
@@ -76,7 +76,7 @@ export default function Settings() {
                         <h4 className="font-bold text-white flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-primary" /> Premium Active
                         </h4>
-                        <p className="text-xs text-gray-400 mt-2">You have full access to Gemini 2.5 Debt Predictions and ARTH Shield.</p>
+                        <p className="text-xs text-gray-400 mt-2">You have full access to Gemini 2.5 Debt Predictions and ARTHA Shield.</p>
                     </GlassCard>
                 </div>
 

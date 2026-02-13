@@ -72,7 +72,7 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="relative z-10 px-6 py-6 flex justify-between items-center max-w-7xl mx-auto">
         <div className="text-2xl font-bold text-white flex items-center gap-2">
-          ARTH <span className="text-primary">₳</span>
+          ARTHA <span className="text-primary">₳</span>
         </div>
         <div className="flex gap-4">
           <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setIsLogin(true)}>Login</Button>
@@ -87,7 +87,7 @@ export default function Landing() {
             Your Money. <br />
             Your Future. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-              Your ARTH.
+              Your ARTHA.
             </span>
           </h1>
           <p className="text-xl text-gray-400 max-w-lg leading-relaxed">
@@ -128,7 +128,7 @@ export default function Landing() {
                   {isLogin ? "Welcome Back" : "Create Account"}
                 </h3>
                 <p className="text-gray-400">
-                  {isLogin ? "Enter your details to access your dashboard" : "Join ARTH and take control of your finances"}
+                  {isLogin ? "Enter your details to access your dashboard" : "Join ARTHA and take control of your finances"}
                 </p>
               </div>
 

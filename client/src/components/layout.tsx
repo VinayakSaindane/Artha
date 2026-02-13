@@ -44,7 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-full bg-sidebar/50 backdrop-blur-xl border-r border-white/5">
       <div className="p-6">
         <h1 className="text-2xl font-bold tracking-tighter text-white flex items-center gap-2">
-          ARTH <span className="text-primary">₳</span>
+          ARTHA <span className="text-primary">₳</span>
         </h1>
       </div>
 
@@ -97,7 +97,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-background/80 backdrop-blur-md border-b border-white/5">
         <h1 className="text-xl font-bold tracking-tighter text-white flex items-center gap-2">
-          ARTH <span className="text-primary">₳</span>
+          ARTHA <span className="text-primary">₳</span>
         </h1>
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
           <SheetTrigger asChild>
