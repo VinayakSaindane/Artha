@@ -1,98 +1,140 @@
 import { GlassCard, StatCard, PageHeader } from "@/components/ui-custom";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  ScanLine, 
-  CreditCard, 
-  Target, 
-  Wallet, 
-  TrendingDown, 
+import {
+  Plus,
+  ScanLine,
+  CreditCard,
+  Target,
+  Wallet,
+  TrendingDown,
   TrendingUp,
   AlertTriangle,
   Coffee,
   ShoppingBag,
   Car,
   Home,
-  Activity
+  Activity,
+  Loader2
 } from "lucide-react";
 import { Link } from "wouter";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { useArthStore } from "@/store/useArthStore";
+import { useState, useEffect } from "react";
+import { expensesApi, pulseApi } from "@/api/arthApi";
 
 export default function Dashboard() {
-  const healthScore = 74;
-  
-  // Health Ring Data
+  const { user } = useArthStore();
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [pulse, setPulse] = useState<any>(null);
+  const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [expensesRes, summaryRes, pulseRes] = await Promise.all([
+        expensesApi.getExpenses(),
+        expensesApi.getSummary(),
+        pulseApi.analyze()
+      ]);
+      setRecentExpenses(expensesRes.data.slice(-4).reverse());
+      setPulse(pulseRes.data);
+
+      const totalExpenses = summaryRes.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+      setStats({
+        income: user?.monthly_income || 45000,
+        expenses: totalExpenses,
+        savings: (user?.monthly_income || 45000) - totalExpenses
+      });
+    } catch (error) {
+      console.error("Failed to fetch dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const healthScore = pulse?.health_score || 74;
+
   const healthData = [
     { name: "Score", value: healthScore },
     { name: "Remaining", value: 100 - healthScore }
   ];
-  
-  // Recent Transactions
-  const transactions = [
-    { id: 1, name: "Uber Ride", category: "Transport", amount: 450, date: "Today, 10:30 AM", icon: Car },
-    { id: 2, name: "Starbucks", category: "Food", amount: 320, date: "Today, 08:15 AM", icon: Coffee },
-    { id: 3, name: "Grocery Mart", category: "Essentials", amount: 1200, date: "Yesterday", icon: ShoppingBag },
-    { id: 4, name: "Rent Payment", category: "Housing", amount: 15000, date: "Feb 1", icon: Home },
-  ];
+
+  const categoryIcons: any = {
+    Food: Coffee,
+    Transport: Car,
+    Essentials: ShoppingBag,
+    Housing: Home,
+    EMI: CreditCard,
+    Other: Wallet
+  };
+
+  if (loading && !stats) {
+    return (
+      <div className="h-96 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Top Greeting & Health Score */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Namaste, Rahul 👋</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Namaste, {user?.name || 'Rahul'} 👋</h1>
           <p className="text-gray-400 mt-1">Here's what's happening with your money today.</p>
         </div>
-        
-        {/* Quick Actions */}
+
         <div className="flex flex-wrap gap-2">
           <Button className="bg-primary hover:bg-primary/90 text-white">
             <Plus className="w-4 h-4 mr-2" /> Add Expense
           </Button>
-          <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
-            <ScanLine className="w-4 h-4 mr-2" /> Scan Agreement
-          </Button>
+          <Link href="/shield">
+            <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
+              <ScanLine className="w-4 h-4 mr-2" /> Scan Agreement
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Monthly Income" 
-          value="₹45,000" 
-          icon={Wallet} 
-          trend="+2.5%" 
-          trendUp={true} 
+        <StatCard
+          title="Monthly Income"
+          value={`₹${(stats?.income || 0).toLocaleString()}`}
+          icon={Wallet}
+          trend="+0%"
+          trendUp={true}
         />
-        <StatCard 
-          title="Expenses" 
-          value="₹28,400" 
-          icon={TrendingDown} 
-          trend="Within Budget" 
-          trendUp={true} 
+        <StatCard
+          title="Expenses"
+          value={`₹${(stats?.expenses || 0).toLocaleString()}`}
+          icon={TrendingDown}
+          trend="Current"
+          trendUp={true}
         />
-        <StatCard 
-          title="Savings" 
-          value="₹16,600" 
-          icon={TrendingUp} 
-          subtext="Target: ₹20k" 
+        <StatCard
+          title="Savings"
+          value={`₹${(stats?.savings || 0).toLocaleString()}`}
+          icon={TrendingUp}
+          subtext={`Target: ₹${((stats?.income || 45000) * 0.2).toLocaleString()}`}
         />
-        <StatCard 
-          title="Debt Risk" 
-          value="Low" 
-          icon={AlertTriangle} 
-          trend="Safe" 
-          trendUp={true} 
+        <StatCard
+          title="Debt Risk"
+          value={pulse?.status || "Low"}
+          icon={AlertTriangle}
+          trend={pulse?.trend || "Safe"}
+          trendUp={pulse?.trend === 'IMPROVING'}
         />
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Health Score Card */}
         <GlassCard className="col-span-1 p-6 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-50">
-             <Activity className="w-6 h-6 text-emerald-400" />
+            <Activity className="w-6 h-6 text-emerald-400" />
           </div>
           <h3 className="text-lg font-medium text-white mb-6">Financial Health</h3>
           <div className="relative w-48 h-48">
@@ -110,59 +152,76 @@ export default function Dashboard() {
                   dataKey="value"
                   stroke="none"
                 >
-                  <Cell key="score" fill="#10B981" />
+                  <Cell key="score" fill={healthScore > 70 ? "#10B981" : healthScore > 40 ? "#F59E0B" : "#EF4444"} />
                   <Cell key="remaining" fill="rgba(255,255,255,0.1)" />
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center -mt-8">
               <span className="text-4xl font-bold text-white">{healthScore}</span>
-              <span className="text-xs text-emerald-400">Excellent</span>
+              <span className={`text-xs ${healthScore > 70 ? 'text-emerald-400' : healthScore > 40 ? 'text-amber-400' : 'text-rose-400'}`}>
+                {healthScore > 70 ? 'Excellent' : healthScore > 40 ? 'Moderate' : 'Critical'}
+              </span>
             </div>
           </div>
           <p className="text-center text-sm text-gray-400 mt-[-20px]">
-            You're doing better than 82% of peers. Keep maintaining your low EMI ratio.
+            {healthScore > 70 ? "You're doing better than 82% of peers. Keep it up!" : "Consider checking the Pulse section for improvement tips."}
           </p>
         </GlassCard>
 
-        {/* Recent Transactions */}
         <GlassCard className="col-span-1 lg:col-span-2 p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-medium text-white">Recent Transactions</h3>
-            <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 p-0 h-auto">View All</Button>
+            <Link href="/track">
+              <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 p-0 h-auto">View All</Button>
+            </Link>
           </div>
           <div className="space-y-4">
-            {transactions.map((t) => (
-              <div key={t.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-white/5 border border-white/5 text-gray-300">
-                    <t.icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.category} • {t.date}</p>
-                  </div>
-                </div>
-                <span className="font-medium text-white">-₹{t.amount}</span>
+            {recentExpenses.length === 0 ? (
+              <div className="h-48 flex flex-col items-center justify-center text-gray-500">
+                <Wallet className="w-12 h-12 mb-2 opacity-20" />
+                <p>No recent expenses found</p>
               </div>
-            ))}
+            ) : (
+              recentExpenses.map((t) => {
+                const Icon = categoryIcons[t.category] || categoryIcons.Other;
+                return (
+                  <div key={t.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 rounded-full bg-white/5 border border-white/5 text-gray-300">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-white">{t.description || t.category}</p>
+                        <p className="text-xs text-gray-400">{t.category} • {t.date}</p>
+                      </div>
+                    </div>
+                    <span className="font-medium text-white">-₹{t.amount.toLocaleString()}</span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </GlassCard>
 
-        {/* Arth Pulse Alert */}
-        <div className="col-span-1 lg:col-span-3">
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex items-center gap-4 animate-pulse">
-            <div className="p-2 bg-amber-500/20 rounded-full text-amber-500">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-amber-500">Arth Pulse Alert</h4>
-              <p className="text-amber-200/80 text-sm">⚠️ Your EMI ratio is projected to hit 48% in 60 days if spending continues. <Link href="/pulse" className="underline hover:text-amber-100">Check Pulse Analysis</Link></p>
+        {pulse && pulse.status !== 'SAFE' && (
+          <div className="col-span-1 lg:col-span-3">
+            <div className={`${pulse.status === 'DANGER' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20'} border rounded-xl p-4 flex items-center gap-4 animate-pulse`}>
+              <div className={`p-2 rounded-full ${pulse.status === 'DANGER' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}`}>
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className={`font-bold ${pulse.status === 'DANGER' ? 'text-rose-500' : 'text-amber-500'}`}>Arth Pulse Alert</h4>
+                <p className={`${pulse.status === 'DANGER' ? 'text-rose-200/80' : 'text-amber-200/80'} text-sm`}>
+                  ⚠️ {pulse.scenario_if_no_action} <Link href="/pulse" className="underline font-bold">Check Analysis</Link>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
   );
 }
+

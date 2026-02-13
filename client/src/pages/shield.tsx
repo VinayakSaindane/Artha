@@ -3,17 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, FileText, CheckCircle, AlertTriangle, XCircle, Download } from "lucide-react";
 import { useState } from "react";
+import { shieldApi } from "@/api/arthApi";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Shield() {
   const [analyzing, setAnalyzing] = useState(false);
-  const [analyzed, setAnalyzed] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [text, setText] = useState("");
+  const { toast } = useToast();
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!text) {
+      toast({
+        title: "Error",
+        description: "Please paste some agreement text first.",
+        variant: "destructive",
+      });
+      return;
+    }
     setAnalyzing(true);
-    setTimeout(() => {
+    try {
+      const response = await shieldApi.analyze(text);
+      setAnalysis(response.data);
+      toast({
+        title: "Success",
+        description: "Agreement analyzed successfully!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to analyze agreement. Please check your API key.",
+        variant: "destructive",
+      });
+      console.error(error);
+    } finally {
       setAnalyzing(false);
-      setAnalyzed(true);
-    }, 2000);
+    }
   };
 
   return (
@@ -21,7 +46,6 @@ export default function Shield() {
       <PageHeader title="Arth Shield" subtitle="AI-powered agreement analyzer to protect you from hidden risks" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Zone */}
         <div className="space-y-6">
           <GlassCard className="p-8 border-dashed border-2 border-white/10 flex flex-col items-center justify-center text-center hover:border-primary/50 transition-colors cursor-pointer min-h-[200px]">
             <div className="p-4 rounded-full bg-white/5 mb-4">
@@ -30,7 +54,7 @@ export default function Shield() {
             <h3 className="text-lg font-medium text-white">Drop your agreement PDF</h3>
             <p className="text-sm text-gray-500 mt-2">or click to browse files</p>
           </GlassCard>
-          
+
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-white/10" />
@@ -40,12 +64,14 @@ export default function Shield() {
             </div>
           </div>
 
-          <Textarea 
-            placeholder="Paste contract clauses here..." 
+          <Textarea
+            placeholder="Paste contract clauses here..."
             className="min-h-[200px] bg-black/20 border-white/10 text-white resize-none focus:border-primary/50"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
           />
 
-          <Button 
+          <Button
             className="w-full h-12 text-lg bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]"
             onClick={handleAnalyze}
             disabled={analyzing}
@@ -54,9 +80,8 @@ export default function Shield() {
           </Button>
         </div>
 
-        {/* Results Zone */}
         <div className="space-y-6">
-          {!analyzed ? (
+          {!analysis ? (
             <GlassCard className="h-full flex flex-col items-center justify-center p-8 text-center opacity-50">
               <FileText className="w-16 h-16 text-gray-600 mb-4" />
               <h3 className="text-xl font-bold text-gray-500">Analysis Results</h3>
@@ -64,15 +89,19 @@ export default function Shield() {
             </GlassCard>
           ) : (
             <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-              {/* Overall Score */}
-              <GlassCard className="p-6 border-l-4 border-l-amber-500">
+              <GlassCard className={`p-6 border-l-4 ${analysis.risk_level === "HIGH" ? "border-l-rose-500" :
+                  analysis.risk_level === "MEDIUM" ? "border-l-amber-500" : "border-l-emerald-500"
+                }`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-gray-400 font-medium text-sm uppercase tracking-wider">Risk Score</h3>
+                    <h3 className="text-gray-400 font-medium text-sm uppercase tracking-wider">Risk Score: {analysis.risk_score}/100</h3>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-3xl font-bold text-amber-500">MEDIUM RISK</span>
-                      <span className="px-2 py-1 bg-amber-500/10 text-amber-500 text-xs rounded-full border border-amber-500/20">Review Required</span>
+                      <span className={`text-3xl font-bold ${analysis.risk_level === "HIGH" ? "text-rose-500" :
+                          analysis.risk_level === "MEDIUM" ? "text-amber-500" : "text-emerald-500"
+                        }`}>{analysis.risk_level} RISK</span>
+                      <span className="px-2 py-1 bg-white/5 text-gray-400 text-xs rounded-full border border-white/10">AI Verified</span>
                     </div>
+                    <p className="text-sm text-gray-400 mt-2">{analysis.summary}</p>
                   </div>
                   <Button variant="outline" size="sm" className="border-white/10 text-white hover:bg-white/5">
                     <Download className="w-4 h-4 mr-2" /> Report
@@ -80,46 +109,52 @@ export default function Shield() {
                 </div>
               </GlassCard>
 
-              {/* Flags List */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm text-gray-400 px-2">
-                  <span>Flagged Clauses (3)</span>
+                  <span>Flagged Clauses ({analysis.flags.length})</span>
                 </div>
 
-                <GlassCard className="p-4 border-l-4 border-l-rose-500">
-                  <div className="flex items-start gap-3">
-                    <XCircle className="w-5 h-5 text-rose-500 mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-rose-400 text-sm">Foreclosure Charges</h4>
-                      <p className="text-white/80 text-sm mt-1">"Bank reserves right to charge 4% penalty on pre-payment."</p>
-                      <div className="mt-3 p-3 bg-rose-500/10 rounded-lg border border-rose-500/20">
-                        <p className="text-xs text-rose-300"><span className="font-bold">RBI Violation:</span> Floating rate loans for individuals cannot have foreclosure charges.</p>
+                {analysis.flags.map((flag: any, i: number) => (
+                  <GlassCard key={i} className={`p-4 border-l-4 ${flag.severity === "HIGH" ? "border-l-rose-500" :
+                      flag.severity === "MEDIUM" ? "border-l-amber-500" : "border-l-emerald-500"
+                    }`}>
+                    <div className="flex items-start gap-3">
+                      {flag.severity === "HIGH" ? <XCircle className="w-5 h-5 text-rose-500 mt-1 shrink-0" /> :
+                        flag.severity === "MEDIUM" ? <AlertTriangle className="w-5 h-5 text-amber-500 mt-1 shrink-0" /> :
+                          <CheckCircle className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />}
+                      <div>
+                        <h4 className={`font-bold text-sm ${flag.severity === "HIGH" ? "text-rose-400" :
+                            flag.severity === "MEDIUM" ? "text-amber-400" : "text-emerald-400"
+                          }`}>{flag.issue}</h4>
+                        <p className="text-white/80 text-sm mt-1">"{flag.clause_text}"</p>
+                        <div className={`mt-3 p-3 rounded-lg border ${flag.severity === "HIGH" ? "bg-rose-500/10 border-rose-500/20" :
+                            flag.severity === "MEDIUM" ? "bg-amber-500/10 border-amber-500/20" : "bg-emerald-500/10 border-emerald-500/20"
+                          }`}>
+                          <p className="text-xs">
+                            <span className="font-bold">Regulation:</span> {flag.regulation_violated}
+                          </p>
+                          <p className="text-xs mt-1">
+                            <span className="font-bold">Suggested Fix:</span> {flag.suggested_fix}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </GlassCard>
+                  </GlassCard>
+                ))}
 
-                <GlassCard className="p-4 border-l-4 border-l-amber-500">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-amber-500 mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-amber-500 text-sm">Interest Reset Clause</h4>
-                      <p className="text-white/80 text-sm mt-1">"Bank may reset the spread at its sole discretion every 3 months."</p>
-                      <p className="text-xs text-amber-400 mt-2">⚠️ Tip: Negotiate for "linked to external benchmark" instead of "sole discretion".</p>
+                {analysis.missing_clauses.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2 px-2">Missing Clauses</h4>
+                    <div className="space-y-2">
+                      {analysis.missing_clauses.map((clause: string, i: number) => (
+                        <div key={i} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10 text-xs text-gray-300">
+                          <AlertTriangle className="w-4 h-4 text-amber-500" />
+                          {clause}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </GlassCard>
-                
-                <GlassCard className="p-4 border-l-4 border-l-emerald-500">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-500 mt-1 shrink-0" />
-                    <div>
-                      <h4 className="font-bold text-emerald-500 text-sm">Tenure Extension</h4>
-                      <p className="text-white/80 text-sm mt-1">Standard clause. No issues found.</p>
-                    </div>
-                  </div>
-                </GlassCard>
-
+                )}
               </div>
             </div>
           )}
@@ -128,3 +163,4 @@ export default function Shield() {
     </div>
   );
 }
+
