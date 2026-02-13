@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { useState, useEffect } from "react";
 import { pulseApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 export default function Pulse() {
   const [showScenario, setShowScenario] = useState(false);
@@ -66,7 +67,7 @@ export default function Pulse() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Row 1: Three Equal Cards */}
         <GlassCard className={`p-8 flex flex-col items-center justify-center text-center border-rose-500/30 bg-gradient-to-b ${analysis?.status === 'DANGER' ? 'from-rose-950/30' :
-            analysis?.status === 'WARNING' ? 'from-amber-950/30' : 'from-emerald-950/30'
+          analysis?.status === 'WARNING' ? 'from-amber-950/30' : 'from-emerald-950/30'
           } to-transparent relative overflow-hidden min-h-[300px]`}>
           <div className="absolute top-0 right-0 p-4 opacity-5">
             <Sparkles className="w-16 h-16" />
@@ -74,7 +75,7 @@ export default function Pulse() {
           <h3 className="text-gray-400 font-medium tracking-widest uppercase mb-4 text-xs">Debt Trap Forecast</h3>
           <div className="relative">
             <h1 className={`text-6xl md:text-7xl font-bold tracking-tighter tabular-nums ${analysis?.status === 'DANGER' ? 'text-rose-500' :
-                analysis?.status === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'
+              analysis?.status === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'
               }`}>
               {analysis?.debt_trap_days ? `${analysis.debt_trap_days} DAYS` : 'SAFE'}
             </h1>
