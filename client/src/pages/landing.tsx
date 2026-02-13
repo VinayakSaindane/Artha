@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, Shield, Activity, Target, PieChart, Lock, Loader2 } from "lucide-react";
+import { ArrowRight, Shield, Activity, Target, PieChart, Lock, Loader2, Sparkles } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { authApi } from "@/api/arthApi";
@@ -58,62 +58,68 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background blobs */}
-      <div
-        className="absolute inset-0 opacity-30 pointer-events-none mix-blend-screen"
-        style={{
-          backgroundImage: `url(${bgGradient})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+    <div className="min-h-screen bg-background relative overflow-hidden sentinel-grid">
+      {/* Dynamic Background Blobs */}
+      <div className="absolute top-0 -left-1/4 w-1/2 h-1/2 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-0 -right-1/4 w-1/2 h-1/2 bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" />
 
       {/* Navigation */}
-      <nav className="relative z-10 px-6 py-6 flex justify-between items-center max-w-7xl mx-auto">
-        <div className="text-2xl font-bold text-white flex items-center gap-2">
-          ARTHA <span className="text-primary">₳</span>
+      <nav className="relative z-20 px-6 py-6 flex justify-between items-center max-w-7xl mx-auto backdrop-blur-md">
+        <div className="text-2xl font-bold text-white flex items-center gap-2 group cursor-default">
+          <div className="p-2 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
+            <Shield className="w-6 h-6 text-primary" />
+          </div>
+          ARTHA <span className="text-primary tracking-tighter">SENTINEL</span>
         </div>
         <div className="flex gap-4">
-          <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => setIsLogin(true)}>Login</Button>
-          <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6" onClick={() => setIsLogin(false)}>Get Started</Button>
+          <Button variant="ghost" className="text-gray-400 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest text-[10px]" onClick={() => setIsLogin(true)}>Login</Button>
+          <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 font-bold shadow-lg shadow-primary/20" onClick={() => setIsLogin(false)}>Secure Access</Button>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-8">
-          <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight">
-            Your Money. <br />
-            Your Future. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-              Your ARTHA.
+      <main className="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="space-y-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-widest animate-in fade-in slide-in-from-left-4">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
             </span>
+            System Status: Monitoring
+          </div>
+
+          <h1 className="text-6xl lg:text-8xl font-bold text-white leading-[0.9] tracking-tighter">
+            THE DIGITAL <br />
+            <span className="text-gradient decoration-4 font-black">SENTINEL</span> <br />
+            FOR WEALTH.
           </h1>
-          <p className="text-xl text-gray-400 max-w-lg leading-relaxed">
-            India's first AI co-pilot that tracks, protects, predicts and plans your entire financial life.
+
+          <p className="text-lg text-gray-400 max-w-lg leading-relaxed font-medium">
+            Beyond tracking. We use high-fidelity AI to <span className="text-primary font-bold">shield</span> your income from predatory legal traps, debt-spirals, and cultural spending spikes.
           </p>
 
           <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-primary hover:bg-primary/90 shadow-[0_0_30px_-10px_rgba(59,130,246,0.5)]" onClick={() => setIsLogin(false)}>
-              Get Started Free <ArrowRight className="ml-2 w-5 h-5" />
+            <Button size="lg" className="h-14 px-10 text-lg rounded-xl bg-primary hover:bg-primary/110 text-white font-black uppercase tracking-tighter shadow-2xl shadow-primary/30 group" onClick={() => setIsLogin(false)}>
+              Activate Shield <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-full border-white/10 text-white hover:bg-white/5">
-              See How It Works
+            <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-white/10 text-white bg-white/5 hover:bg-white/10 backdrop-blur-md shadow-xl transition-all">
+              Live Demo
             </Button>
           </div>
 
-          <div className="flex flex-wrap gap-3 pt-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-4">
             {[
-              { icon: PieChart, text: "Track" },
-              { icon: Shield, text: "Shield" },
-              { icon: Activity, text: "Score" },
-              { icon: Target, text: "Goals" },
-              { icon: Activity, text: "Pulse" }
+              { icon: PieChart, text: "Wealth Track", desc: "Real-time auditing" },
+              { icon: Shield, text: "Legal Shield", desc: "Contract analysis" },
+              { icon: Activity, text: "Debt Pulse", desc: "Trap forecasting" },
+              { icon: Target, text: "Life Goals", desc: "Wealth roadmaps" },
+              { icon: Activity, text: "Score Guard", desc: "CIBIL protection" },
+              { icon: Sparkles, text: "Festival Guard", desc: "Seasonal saving" }
             ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/5 text-sm text-gray-300">
-                <feature.icon className="w-4 h-4 text-primary" />
-                {feature.text}
+              <div key={i} className="group p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 hover:bg-white/[0.07] transition-all cursor-default animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: `${i * 100}ms` }}>
+                <feature.icon className="w-5 h-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <p className="text-xs font-bold text-white uppercase tracking-wider">{feature.text}</p>
+                <p className="text-[10px] text-gray-500 mt-1">{feature.desc}</p>
               </div>
             ))}
           </div>

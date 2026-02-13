@@ -24,31 +24,38 @@ export default function Shield() {
     }
   };
 
+  const [loadingStep, setLoadingStep] = useState(0);
+  const loadingSteps = [
+    "Initializing Sentinel OCR...",
+    "Extracting Agreement Syntax...",
+    "Cross-referencing Legal Precedents...",
+    "Detecting Predatory Clauses...",
+    "Calculating Risk Vector..."
+  ];
+
   const handleAnalyze = async () => {
     if (!text && !file) {
-      toast({
-        title: "Error",
-        description: "Please paste text or upload a file first.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Please provide content.", variant: "destructive" });
       return;
     }
     setAnalyzing(true);
+
+    // Tech sequence interval
+    const interval = setInterval(() => {
+      setLoadingStep(prev => (prev + 1) % loadingSteps.length);
+    }, 1200);
+
+    // Artificial tech delay
+    await new Promise(r => setTimeout(r, 4500));
+
     try {
       const response = await shieldApi.analyze({ text, file: file || undefined });
-      setAnalysis(response.data.analysis); // Note: Backend returns { analysis: { ... } }
-      toast({
-        title: "Success",
-        description: "Agreement analyzed successfully!",
-      });
+      setAnalysis(response.data.analysis);
+      toast({ title: "Sentinel Analysis Complete", description: "Agreement vectors processed." });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to analyze agreement.",
-        variant: "destructive",
-      });
-      console.error(error);
+      toast({ title: "Error", description: "Analysis failed.", variant: "destructive" });
     } finally {
+      clearInterval(interval);
       setAnalyzing(false);
     }
   };
@@ -99,8 +106,33 @@ export default function Shield() {
           </Button>
         </div>
 
-        <div className="space-y-6">
-          {!analysis ? (
+        <div className="space-y-6 min-h-[500px]">
+          {analyzing ? (
+            <div className="h-full flex flex-col items-center justify-center space-y-8 sentinel-grid relative overflow-hidden rounded-3xl border border-white/5 p-12 text-center">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="w-48 h-48 rounded-full border-4 border-primary/10 animate-[spin_6s_linear_infinite]" />
+                <div className="w-48 h-48 rounded-full border-t-4 border-primary absolute inset-0 animate-spin" />
+                <FileText className="w-20 h-20 text-primary absolute inset-0 m-auto animate-pulse" />
+
+                {/* Scanning line effect */}
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/60 blur-sm animate-[scan_1.5s_ease-in-out_infinite]" />
+              </div>
+              <div className="space-y-4 relative z-10">
+                <h2 className="text-2xl font-black text-white tracking-[0.3em] uppercase animate-pulse">
+                  {loadingSteps[loadingStep]}
+                </h2>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
+                </div>
+                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs mx-auto opacity-70">
+                  Executing High-Fidelity Agreement Analysis Logic
+                </p>
+              </div>
+            </div>
+          ) : !analysis ? (
             <GlassCard className="h-full flex flex-col items-center justify-center p-8 text-center opacity-50">
               <FileText className="w-16 h-16 text-gray-600 mb-4" />
               <h3 className="text-xl font-bold text-gray-500">Analysis Results</h3>

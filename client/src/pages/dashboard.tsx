@@ -320,16 +320,33 @@ export default function Dashboard() {
           icon={TrendingUp}
           subtext={`Target: ₹${((stats?.income || 45000) * 0.2).toLocaleString()}`}
         />
-        <StatCard
-          title="Debt Risk"
-          value={pulse?.status || "Low"}
-          icon={AlertTriangle}
-          trend={pulse?.trend || "Safe"}
-          trendUp={pulse?.trend === 'IMPROVING'}
-        />
+        <div className="sentinel-border glow-blue rounded-xl">
+          <StatCard
+            title="Debt Risk"
+            value={pulse?.status || "Low"}
+            icon={AlertTriangle}
+            trend={pulse?.trend || "Safe"}
+            trendUp={pulse?.trend === 'IMPROVING'}
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <GlassCard className="p-6 sentinel-border glow-blue">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-400 text-sm font-medium">Total Balance</p>
+              <h3 className="text-3xl font-bold text-white mt-1">₹{stats.savings.toLocaleString()}</h3>
+            </div>
+            <div className="p-3 bg-primary/20 rounded-xl">
+              <CreditCard className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-sm text-emerald-400 font-bold">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span>Sentinel Scanned: Healthy</span>
+          </div>
+        </GlassCard>
         <GlassCard className="col-span-1 p-6 flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-50">
             <Activity className="w-6 h-6 text-emerald-400" />

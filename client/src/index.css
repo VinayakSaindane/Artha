@@ -124,18 +124,61 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-white/5 border border-white/10 backdrop-blur-md shadow-xl;
+    @apply bg-white/5 border border-white/10 backdrop-blur-md shadow-xl transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply border-white/20 bg-white/10 shadow-[0_0_20px_rgba(59,130,246,0.15)];
   }
   
   .glass-panel {
-    @apply bg-black/20 border border-white/5 backdrop-blur-sm;
+    @apply bg-black/40 border border-white/10 backdrop-blur-xl;
   }
   
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-emerald-400;
   }
 
   .text-gradient-danger {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-rose-500 to-orange-500;
+  }
+
+  /* Sentinel Specific Utilities */
+  .glow-blue {
+    box-shadow: 0 0 15px -3px rgba(59, 130, 246, 0.5);
+  }
+  
+  .glow-emerald {
+    box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.5);
+  }
+
+  .glow-rose {
+    box-shadow: 0 0 15px -3px rgba(244, 63, 94, 0.5);
+  }
+
+  .sentinel-border {
+    @apply relative overflow-hidden;
+  }
+
+  .sentinel-border::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-25deg);
+    animation: scan 3s infinite;
+  }
+
+  @keyframes scan {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  .sentinel-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
   }
 }

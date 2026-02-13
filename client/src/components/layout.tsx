@@ -69,17 +69,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5">
-          <Avatar className="w-10 h-10 border border-white/10">
+      <div className="p-4 space-y-3">
+        {/* Sentinel Active Status */}
+        <div className="mx-2 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-emerald-400">Sentinel Active</span>
+          </div>
+          <Activity className="w-3 h-3 text-emerald-500/50" />
+        </div>
+
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/5 backdrop-blur-md">
+          <Avatar className="w-10 h-10 border border-white/10 ring-2 ring-primary/20">
             <AvatarImage src="" />
-            <AvatarFallback>{user?.name?.[0] || 'U'}</AvatarFallback>
+            <AvatarFallback className="bg-primary/20 text-primary font-bold">{user?.name?.[0] || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
-            <p className="text-xs text-gray-400 truncate">Premium Plan</p>
+            <p className="text-sm font-bold text-white truncate">{user?.name || 'User'}</p>
+            <p className="text-[10px] text-primary font-bold uppercase tracking-wider">Premium Sentinel</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-white" onClick={logout}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-white hover:bg-white/10" onClick={logout}>
             <LogOut className="w-4 h-4" />
           </Button>
         </div>

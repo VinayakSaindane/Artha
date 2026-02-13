@@ -23,19 +23,35 @@ export default function Pulse() {
     fetchAnalysis();
   }, []);
 
+  const [loadingStep, setLoadingStep] = useState(0);
+  const loadingSteps = [
+    "Initializing Sentinel Pulse...",
+    "Scanning EMI Risk Vectors...",
+    "Analyzing Debt-to-Income Liquidity...",
+    "Predicting Trap Forecast Curves...",
+    "Finalizing Strategic Prescription..."
+  ];
+
+  useEffect(() => {
+    let interval: any;
+    if (analyzing) {
+      interval = setInterval(() => {
+        setLoadingStep(prev => (prev + 1) % loadingSteps.length);
+      }, 1500);
+    }
+    return () => clearInterval(interval);
+  }, [analyzing]);
+
   const fetchAnalysis = async () => {
     setAnalyzing(true);
+    // Artificially delay for the "Tech" feel
+    await new Promise(r => setTimeout(r, 4000));
     try {
       const response = await pulseApi.analyze();
       setAnalysis(response.data);
-      // Cache for next time
       localStorage.setItem("pulse_analysis", JSON.stringify(response.data));
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to analyze debt pulse.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Pulse scan failed.", variant: "destructive" });
     } finally {
       setAnalyzing(false);
     }
@@ -62,15 +78,28 @@ export default function Pulse() {
 
   if (analyzing && !analysis) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center space-y-8">
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-8 sentinel-grid relative overflow-hidden rounded-3xl border border-white/5">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         <div className="relative">
-          <div className="w-32 h-32 rounded-full border-8 border-primary/10 animate-[spin_3s_linear_infinite]" />
-          <div className="w-32 h-32 rounded-full border-t-8 border-primary absolute inset-0 animate-spin" />
-          <Activity className="w-12 h-12 text-primary absolute inset-0 m-auto animate-pulse" />
+          <div className="w-40 h-40 rounded-full border-4 border-primary/10 animate-[spin_4s_linear_infinite]" />
+          <div className="w-40 h-40 rounded-full border-t-4 border-primary absolute inset-0 animate-spin" />
+          <Activity className="w-16 h-16 text-primary absolute inset-0 m-auto animate-pulse" />
+
+          {/* Scanning line effect */}
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-primary/40 blur-sm animate-[scan_2s_ease-in-out_infinite]" />
         </div>
-        <div className="text-center space-y-3">
-          <h2 className="text-2xl font-bold text-white tracking-[0.2em] uppercase">Pulse Analysis Active</h2>
-          <p className="text-gray-500 text-sm animate-pulse max-w-xs mx-auto">Scanning your financial vital signs and predicting debt trap vectors...</p>
+        <div className="text-center space-y-4 relative z-10">
+          <h2 className="text-2xl font-black text-white tracking-[0.3em] uppercase animate-pulse">
+            {loadingSteps[loadingStep]}
+          </h2>
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></span>
+            <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></span>
+            <span className="w-2 h-2 rounded-full bg-primary animate-bounce"></span>
+          </div>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest max-w-xs mx-auto opacity-60">
+            Real-time Financial Vital Sign Audit in Progress
+          </p>
         </div>
       </div>
     );
