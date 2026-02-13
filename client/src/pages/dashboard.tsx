@@ -14,13 +14,14 @@ import {
   Car,
   Home,
   Activity,
-  Loader2
+  Loader2,
+  Sparkles
 } from "lucide-react";
 import { Link } from "wouter";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useArthStore } from "@/store/useArthStore";
 import { useState, useEffect } from "react";
-import { expensesApi, pulseApi } from "@/api/arthApi";
+import { expensesApi, pulseApi, festivalApi } from "@/api/arthApi";
 
 export default function Dashboard() {
   const { user } = useArthStore();
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [pulse, setPulse] = useState<any>(null);
   const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
+  const [festivals, setFestivals] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -40,10 +42,11 @@ export default function Dashboard() {
       const expensesRes = await expensesApi.getExpenses();
       setRecentExpenses(expensesRes.data.slice(0, 4));
 
-      // Fetch summary and pulse in parallel
-      const [summaryRes, pulseRes] = await Promise.allSettled([
+      // Fetch summary, pulse and festivals in parallel
+      const [summaryRes, pulseRes, festivalRes] = await Promise.allSettled([
         expensesApi.getSummary(),
-        pulseApi.analyze()
+        pulseApi.analyze(),
+        festivalApi.getFestivals()
       ]);
 
       let totalExpenses = 0;
@@ -53,6 +56,10 @@ export default function Dashboard() {
 
       if (pulseRes.status === 'fulfilled') {
         setPulse(pulseRes.value.data);
+      }
+
+      if (festivalRes.status === 'fulfilled') {
+        setFestivals(festivalRes.value.data);
       }
 
       setStats({
@@ -216,7 +223,7 @@ export default function Dashboard() {
 
         {pulse && pulse.status !== 'SAFE' && (
           <div className="col-span-1 lg:col-span-3">
-            <div className={`${pulse.status === 'DANGER' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20'} border rounded-xl p-4 flex items-center gap-4 animate-pulse`}>
+            <div className={`${pulse.status === 'DANGER' ? 'bg-rose-500/10 border-rose-500/20' : 'bg-amber-500/10 border-amber-500/20'} border rounded-xl p-4 flex items-center gap-4`}>
               <div className={`p-2 rounded-full ${pulse.status === 'DANGER' ? 'bg-rose-500/20 text-rose-500' : 'bg-amber-500/20 text-amber-500'}`}>
                 <AlertTriangle className="w-6 h-6" />
               </div>
@@ -224,6 +231,22 @@ export default function Dashboard() {
                 <h4 className={`font-bold ${pulse.status === 'DANGER' ? 'text-rose-500' : 'text-amber-500'}`}>Arth Pulse Alert</h4>
                 <p className={`${pulse.status === 'DANGER' ? 'text-rose-200/80' : 'text-amber-200/80'} text-sm`}>
                   ⚠️ {pulse.scenario_if_no_action} <Link href="/pulse" className="underline font-bold">Check Analysis</Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {festivals.length > 0 && (
+          <div className="col-span-1 lg:col-span-3">
+            <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex items-center gap-4">
+              <div className="p-2 rounded-full bg-primary/20 text-primary">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-white">Festival Debt Shield Active: {festivals[0].name}</h4>
+                <p className="text-gray-400 text-sm">
+                  You have {Math.ceil((new Date(festivals[0].date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days to reach your goal. <Link href="/festival-shield" className="text-primary underline font-bold">See Strategy</Link>
                 </p>
               </div>
             </div>

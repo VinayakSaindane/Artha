@@ -61,4 +61,14 @@ export const goalsApi = {
     plan: (data: any) => api.post('/goals/plan', data),
 };
 
+export const festivalApi = {
+    plan: (data: { name: string; date: string }) => api.post('/festival/plan', data),
+    getFestivals: () => api.get('/festival'),
+};
+
+export const limitsApi = {
+    setLimits: (limits: any) => api.post('/limits', { limits }),
+    getLimits: () => api.get('/limits'),
+};
+
 export default api;

@@ -9,7 +9,8 @@ import {
   Settings,
   Menu,
   LogOut,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
   { label: "Track", icon: PieChart, href: "/track" },
   { label: "Shield", icon: ShieldCheck, href: "/shield" },
+  { label: "Festival Shield", icon: Sparkles, href: "/festival-shield" },
   { label: "Score", icon: CreditCard, href: "/score" },
   { label: "Goals", icon: Target, href: "/goals" },
   { label: "Pulse", icon: Activity, href: "/pulse" },

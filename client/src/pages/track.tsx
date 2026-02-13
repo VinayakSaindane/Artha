@@ -4,12 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Mic, Search, Filter, TrendingUp, Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useState, useEffect } from "react";
-import { expensesApi } from "@/api/arthApi";
+import { expensesApi, limitsApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useArthStore } from "@/store/useArthStore";
+import { Settings2 } from "lucide-react";
 
 export default function Track() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -17,6 +18,8 @@ export default function Track() {
   const [loading, setLoading] = useState(false);
   const [newExpense, setNewExpense] = useState({ amount: "", category: "Food", description: "" });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLimitsOpen, setIsLimitsOpen] = useState(false);
+  const [categoryLimits, setCategoryLimits] = useState<any>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,12 +29,14 @@ export default function Track() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [expensesRes, summaryRes] = await Promise.all([
+      const [expensesRes, summaryRes, limitsRes] = await Promise.all([
         expensesApi.getExpenses(),
-        expensesApi.getSummary()
+        expensesApi.getSummary(),
+        limitsApi.getLimits()
       ]);
       setExpenses(expensesRes.data);
       setSummary(summaryRes.data);
+      setCategoryLimits(limitsRes.data);
     } catch (error) {
       toast({
         title: "Error",
@@ -43,14 +48,39 @@ export default function Track() {
     }
   };
 
+  const handleUpdateLimits = async (cat: string, amount: string) => {
+    try {
+      const newLimits = { ...categoryLimits, [cat]: parseFloat(amount) };
+      await limitsApi.setLimits(newLimits);
+      setCategoryLimits(newLimits);
+      toast({ title: "Limit Updated", description: `${cat} limit set to ₹${amount}` });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update limit.", variant: "destructive" });
+    }
+  };
+
   const handleAddExpense = async () => {
     if (!newExpense.amount) return;
     try {
+      const amount = parseFloat(newExpense.amount);
       await expensesApi.createExpense({
         ...newExpense,
-        amount: parseFloat(newExpense.amount)
+        amount
       });
-      toast({ title: "Expense Added", description: "Your expense has been logged." });
+
+      const categoryTotal = summary.find(s => s.category === newExpense.category)?.total_amount || 0;
+      const limit = categoryLimits[newExpense.category];
+
+      if (limit && (categoryTotal + amount) > limit) {
+        toast({
+          title: "Limit Exceeded! ⚠️",
+          description: `You've cross your ₹${limit} limit for ${newExpense.category}.`,
+          variant: "destructive"
+        });
+      } else {
+        toast({ title: "Expense Added", description: "Your expense has been logged." });
+      }
+
       setIsDialogOpen(false);
       setNewExpense({ amount: "", category: "Food", description: "" });
       fetchData();
@@ -78,15 +108,18 @@ export default function Track() {
   const income = user?.monthly_income || 50000;
 
   const budgetData = summary.map(s => {
-    // Basic 50/30/20 rule inspired logic
-    let budgetFactor = 0.1; // Default 10%
+    // Basic 50/30/20 rule inspired logic as fallback
+    let budgetFactor = 0.1;
     if (s.category === 'Food') budgetFactor = 0.15;
     if (s.category === 'Transport') budgetFactor = 0.05;
     if (s.category === 'EMI') budgetFactor = 0.35;
 
+    const fallbackLimit = income * budgetFactor;
+    const userLimit = categoryLimits[s.category];
+
     return {
       category: s.category,
-      budget: income * budgetFactor,
+      budget: userLimit || fallbackLimit,
       actual: s.total_amount
     };
   });
@@ -109,6 +142,40 @@ export default function Track() {
           <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border border-white/10">
             <Mic className="w-4 h-4 mr-2" /> Voice Add
           </Button>
+
+          <Dialog open={isLimitsOpen} onOpenChange={setIsLimitsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-white/10 text-gray-300">
+                <Settings2 className="w-4 h-4 mr-2" /> Manage Limits
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white max-w-md">
+              <DialogHeader>
+                <DialogTitle>Category Expenditure Limits</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
+                {Object.keys(CATEGORY_COLORS).map(cat => (
+                  <div key={cat} className="flex items-center justify-between gap-4 p-3 bg-white/5 rounded-xl border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[cat] }} />
+                      <span className="text-sm font-medium">{cat}</span>
+                    </div>
+                    <div className="relative w-32">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-500">₹</span>
+                      <Input
+                        type="number"
+                        placeholder="Limit"
+                        defaultValue={categoryLimits[cat] || Math.round(income * (cat === 'EMI' ? 0.35 : cat === 'Food' ? 0.15 : 0.1))}
+                        className="h-8 pl-5 bg-black/40 border-white/10 text-xs"
+                        onBlur={(e) => handleUpdateLimits(cat, e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button onClick={() => setIsLimitsOpen(false)} className="w-full bg-primary mt-2">Finish Setup</Button>
+            </DialogContent>
+          </Dialog>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
