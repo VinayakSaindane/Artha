@@ -1,4 +1,5 @@
 import { GlassCard, PageHeader } from "@/components/ui-custom";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 
 export default function Goals() {
   const [age, setAge] = useState([28]);
@@ -25,7 +30,12 @@ export default function Goals() {
   const [plan, setPlan] = useState<any>(null);
   const [goals, setGoals] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState({ name: "", target_amount: "", category: "Other", deadline: "" });
+  const [newGoal, setNewGoal] = useState<{ name: string, target_amount: string, category: string, deadline: Date | undefined }>({
+    name: "",
+    target_amount: "",
+    category: "Other",
+    deadline: undefined
+  });
   const { toast } = useToast();
 
   const categoryIcons: any = {
@@ -74,7 +84,7 @@ export default function Goals() {
       });
       toast({ title: "Goal Set! 🎯", description: "Your new financial target has been saved." });
       setIsDialogOpen(false);
-      setNewGoal({ name: "", target_amount: "", category: "Other", deadline: "" });
+      setNewGoal({ name: "", target_amount: "", category: "Other", deadline: undefined });
       fetchGoals();
     } catch (error) {
       toast({ title: "Error", description: "Failed to create goal.", variant: "destructive" });
@@ -172,12 +182,29 @@ export default function Goals() {
               </div>
               <div className="space-y-2">
                 <Label>Target Date</Label>
-                <Input
-                  type="date"
-                  value={newGoal.deadline}
-                  onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
-                  className="bg-black/40 border-white/10 text-white"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal bg-black/40 border-white/10 text-white",
+                        !newGoal.deadline && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newGoal.deadline ? format(newGoal.deadline, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-[#0D1425] border-white/10" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newGoal.deadline}
+                      onSelect={(date) => setNewGoal({ ...newGoal, deadline: date })}
+                      initialFocus
+                      className="bg-[#0D1425] text-white"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <Button onClick={handleAddGoal} className="w-full bg-primary mt-4">Save Goal</Button>
             </div>

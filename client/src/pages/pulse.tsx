@@ -15,6 +15,11 @@ export default function Pulse() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load cached analysis first for instant feel
+    const cached = localStorage.getItem("pulse_analysis");
+    if (cached) {
+      setAnalysis(JSON.parse(cached));
+    }
     fetchAnalysis();
   }, []);
 
@@ -23,6 +28,8 @@ export default function Pulse() {
     try {
       const response = await pulseApi.analyze();
       setAnalysis(response.data);
+      // Cache for next time
+      localStorage.setItem("pulse_analysis", JSON.stringify(response.data));
     } catch (error: any) {
       toast({
         title: "Error",
@@ -41,8 +48,16 @@ export default function Pulse() {
 
   if (analyzing && !analysis) {
     return (
-      <div className="h-96 flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      <div className="h-[60vh] flex flex-col items-center justify-center space-y-8">
+        <div className="relative">
+          <div className="w-32 h-32 rounded-full border-8 border-primary/10 animate-[spin_3s_linear_infinite]" />
+          <div className="w-32 h-32 rounded-full border-t-8 border-primary absolute inset-0 animate-spin" />
+          <Activity className="w-12 h-12 text-primary absolute inset-0 m-auto animate-pulse" />
+        </div>
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl font-bold text-white tracking-[0.2em] uppercase">Pulse Analysis Active</h2>
+          <p className="text-gray-500 text-sm animate-pulse max-w-xs mx-auto">Scanning your financial vital signs and predicting debt trap vectors...</p>
+        </div>
       </div>
     );
   }
