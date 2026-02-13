@@ -6,17 +6,11 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/api"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/api/index.ts"
+            "destination": "/api/index.ts"
         },
         {
-            "src": "/(.*)",
-            "dest": "/index.html"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
