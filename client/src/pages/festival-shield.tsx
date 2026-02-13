@@ -14,7 +14,29 @@ export default function FestivalShield() {
     const [festivalDate, setFestivalDate] = useState("");
     const [loading, setLoading] = useState(false);
     const [analysis, setAnalysis] = useState<any>(null);
+    const [pageLoading, setPageLoading] = useState(true);
     const { toast } = useToast();
+
+    useEffect(() => {
+        const fetchFestivals = async () => {
+            try {
+                const response = await festivalApi.getFestivals();
+                if (response.data.length > 0) {
+                    const latest = response.data[response.data.length - 1];
+                    if (latest.analysis) {
+                        setAnalysis(latest.analysis);
+                        setFestivalName(latest.name);
+                        setFestivalDate(new Date(latest.date).toISOString().split('T')[0]);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch festivals", error);
+            } finally {
+                setPageLoading(false);
+            }
+        };
+        fetchFestivals();
+    }, []);
 
     const handlePlan = async () => {
         if (!festivalName || !festivalDate) {
@@ -26,12 +48,21 @@ export default function FestivalShield() {
             const response = await festivalApi.plan({ name: festivalName, date: festivalDate });
             setAnalysis(response.data.analysis);
             toast({ title: "Shield Activated! 🛡️", description: "Your savings strategy is ready." });
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to generate strategy.", variant: "destructive" });
+        } catch (error: any) {
+            const errorMsg = error.response?.data?.error || "Failed to generate strategy.";
+            toast({ title: "Error", description: errorMsg, variant: "destructive" });
         } finally {
             setLoading(false);
         }
     };
+
+    if (pageLoading) {
+        return (
+            <div className="h-96 flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

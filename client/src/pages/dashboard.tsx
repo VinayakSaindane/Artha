@@ -1,10 +1,8 @@
 import { GlassCard, StatCard, PageHeader } from "@/components/ui-custom";
-import { Button } from "@/components/ui/button";
 import {
   Plus,
   ScanLine,
   CreditCard,
-  Target,
   Wallet,
   TrendingDown,
   TrendingUp,
@@ -22,6 +20,18 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useArthStore } from "@/store/useArthStore";
 import { useState, useEffect } from "react";
 import { expensesApi, pulseApi, festivalApi } from "@/api/arthApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const { user } = useArthStore();
@@ -30,6 +40,27 @@ export default function Dashboard() {
   const [pulse, setPulse] = useState<any>(null);
   const [recentExpenses, setRecentExpenses] = useState<any[]>([]);
   const [festivals, setFestivals] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newExpense, setNewExpense] = useState({ amount: "", category: "Food", description: "" });
+  const { toast } = useToast();
+
+  const CATEGORY_COLORS: any = {
+    Food: "#3B82F6",
+    Transport: "#10B981",
+    EMI: "#F59E0B",
+    Health: "#EF4444",
+    Fun: "#8B5CF6",
+    Other: "#6B7280"
+  };
+
+  const categoryIcons: any = {
+    Food: Coffee,
+    Transport: Car,
+    Essentials: ShoppingBag,
+    Housing: Home,
+    EMI: CreditCard,
+    Other: Wallet
+  };
 
   useEffect(() => {
     fetchData();
@@ -38,11 +69,9 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch expenses (Core data)
       const expensesRes = await expensesApi.getExpenses();
       setRecentExpenses(expensesRes.data.slice(0, 4));
 
-      // Fetch summary, pulse and festivals in parallel
       const [summaryRes, pulseRes, festivalRes] = await Promise.allSettled([
         expensesApi.getSummary(),
         pulseApi.analyze(),
@@ -74,21 +103,27 @@ export default function Dashboard() {
     }
   };
 
-  const healthScore = pulse?.health_score || 0;
+  const handleAddExpense = async () => {
+    if (!newExpense.amount) return;
+    try {
+      await expensesApi.createExpense({
+        ...newExpense,
+        amount: parseFloat(newExpense.amount)
+      });
+      toast({ title: "Expense Added", description: "Your expense has been logged." });
+      setIsDialogOpen(false);
+      setNewExpense({ amount: "", category: "Food", description: "" });
+      fetchData();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add expense.", variant: "destructive" });
+    }
+  };
 
+  const healthScore = pulse?.health_score || 0;
   const healthData = [
     { name: "Score", value: healthScore },
     { name: "Remaining", value: 100 - healthScore }
   ];
-
-  const categoryIcons: any = {
-    Food: Coffee,
-    Transport: Car,
-    Essentials: ShoppingBag,
-    Housing: Home,
-    EMI: CreditCard,
-    Other: Wallet
-  };
 
   if (loading && !stats) {
     return (
@@ -107,9 +142,57 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button className="bg-primary hover:bg-primary/90 text-white">
-            <Plus className="w-4 h-4 mr-2" /> Add Expense
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-primary hover:bg-primary/90 text-white shadow-[0_4px_20px_-5px_rgba(59,130,246,0.5)]">
+                <Plus className="w-4 h-4 mr-2" /> Add Expense
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">
+              <DialogHeader>
+                <DialogTitle>Add New Expense</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Amount (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="500"
+                    value={newExpense.amount}
+                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={newExpense.category}
+                    onValueChange={(val) => setNewExpense({ ...newExpense, category: val })}
+                  >
+                    <SelectTrigger className="bg-black/40 border-white/10">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0D1425] border-white/10 text-white">
+                      {Object.keys(CATEGORY_COLORS).map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input
+                    placeholder="e.g. Dinner"
+                    value={newExpense.description}
+                    onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <Button onClick={handleAddExpense} className="w-full bg-primary">Save Expense</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Link href="/shield">
             <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
               <ScanLine className="w-4 h-4 mr-2" /> Scan Agreement
@@ -203,14 +286,14 @@ export default function Dashboard() {
               recentExpenses.map((t) => {
                 const Icon = categoryIcons[t.category] || categoryIcons.Other;
                 return (
-                  <div key={t.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
+                  <div key={t._id || t.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors">
                     <div className="flex items-center gap-4">
                       <div className="p-3 rounded-full bg-white/5 border border-white/5 text-gray-300">
                         <Icon className="w-5 h-5" />
                       </div>
                       <div>
                         <p className="font-medium text-white">{t.description || t.category}</p>
-                        <p className="text-xs text-gray-400">{t.category} • {t.date}</p>
+                        <p className="text-xs text-gray-400">{t.category} • {new Date(t.date).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <span className="font-medium text-white">-₹{t.amount.toLocaleString()}</span>
@@ -252,9 +335,7 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
 }
-
