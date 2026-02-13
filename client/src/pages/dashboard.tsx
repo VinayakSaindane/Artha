@@ -364,19 +364,17 @@ export default function Dashboard() {
           icon={TrendingUp}
           subtext={`Target: ₹${((stats?.income || 45000) * 0.2).toLocaleString()}`}
         />
-        <div className="sentinel-border  rounded-xl">
-          <StatCard
-            title="Debt Risk"
-            value={pulse?.status || "Low"}
-            icon={AlertTriangle}
-            trend={pulse?.trend || "Safe"}
-            trendUp={pulse?.trend === 'IMPROVING'}
-          />
-        </div>
+        <StatCard
+          title="Debt Risk"
+          value={pulse?.status || "Low"}
+          icon={AlertTriangle}
+          trend={pulse?.trend || "Safe"}
+          trendUp={pulse?.trend === 'IMPROVING'}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <GlassCard className="p-6 sentinel-border ">
+        <GlassCard className="p-6">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-400 text-sm font-medium">Total Balance</p>

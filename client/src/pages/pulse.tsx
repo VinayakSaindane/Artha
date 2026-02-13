@@ -104,7 +104,7 @@ export default function Pulse() {
 
       {/* ── Page Title + Refresh ─────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
-        <PageHeader title="Arth Pulse" subtitle="Your personal financial health report" />
+        <PageHeader title="Artha Pulse" subtitle="Your personal financial health report" />
         <Button
           variant="outline"
           size="sm"
