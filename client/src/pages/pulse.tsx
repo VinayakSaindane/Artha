@@ -159,14 +159,16 @@ export default function Pulse() {
               <AlertOctagon className="w-48 h-48 text-emerald-500" />
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-10 relative z-10 items-stretch">
-              {/* Left Info Column */}
-              <div className="xl:col-span-1 flex flex-col h-full bg-black/20 p-8 rounded-3xl border border-white/5">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 relative z-10 items-stretch">
+              {/* Left Info Column - Made Wider with proper width constraints */}
+              <div className="xl:col-span-5 flex flex-col h-full bg-black/20 p-8 rounded-3xl border border-white/5 min-w-0">
                 <div className="p-4 bg-emerald-500/20 rounded-2xl w-fit mb-6">
                   <AlertOctagon className="w-8 h-8 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Immediate Action Plan</h3>
-                <p className="text-gray-400 leading-relaxed text-sm flex-1">
+                <h3 className="text-2xl font-bold text-white mb-4 leading-tight" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
+                  Immediate Action Plan
+                </h3>
+                <p className="text-gray-400 leading-relaxed text-sm flex-1" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
                   {analysis.scenario_if_no_action || "Your financial health is currently stable. Follow these AI-curated steps to further optimize your savings and bulletproof your future from debt traps."}
                 </p>
                 <Button className="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 shadow-lg shadow-emerald-500/20">
@@ -175,35 +177,41 @@ export default function Pulse() {
               </div>
 
               {/* Steps Grid Column */}
-              <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="xl:col-span-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
                 {(analysis.prescription || []).map((step: any, i: number) => (
-                  <div key={i} className="bg-black/30 p-8 rounded-3xl border border-white/10 hover:border-emerald-500/30 transition-all flex flex-col justify-between group overflow-hidden relative">
+                  <div key={i} className="bg-black/30 p-6 rounded-3xl border border-white/10 hover:border-emerald-500/30 transition-all flex flex-col justify-between group relative min-w-0">
                     <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-opacity">
                       <CheckCircle className="w-16 h-16 text-emerald-500" />
                     </div>
 
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-emerald-400 font-bold text-[10px] tracking-[0.2em] uppercase bg-emerald-500/10 px-3 py-1 rounded-full">Step 0{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-4 flex-wrap">
+                        <span className="text-emerald-400 font-bold text-[10px] tracking-[0.2em] uppercase bg-emerald-500/10 px-3 py-1 rounded-full whitespace-nowrap">
+                          Step 0{i + 1}
+                        </span>
                         <span className={cn(
-                          "text-[10px] font-bold uppercase tracking-widest border px-3 py-1 rounded-full",
+                          "text-[10px] font-bold uppercase tracking-widest border px-3 py-1 rounded-full whitespace-nowrap",
                           step.priority === 'HIGH' ? "text-rose-400 border-rose-500/30 bg-rose-500/5" : "text-emerald-400 border-emerald-500/30 bg-emerald-500/5"
                         )}>
                           {step.priority}
                         </span>
                       </div>
-                      <h4 className="text-white font-bold text-lg mb-4 leading-snug group-hover:text-emerald-400 transition-colors">Action Required</h4>
-                      <p className="text-gray-300 text-sm leading-relaxed mb-6">{step.action}</p>
+                      <h4 className="text-white font-bold text-base mb-3 leading-snug group-hover:text-emerald-400 transition-colors" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
+                        Action Required
+                      </h4>
+                      <p className="text-gray-300 text-sm leading-relaxed mb-6" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
+                        {step.action}
+                      </p>
                     </div>
 
-                    <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <div className="pt-4 border-t border-white/5 flex items-center justify-between min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                           <DollarSign className="w-4 h-4 text-emerald-500" />
                         </div>
-                        <div>
-                          <p className="text-[10px] text-gray-500 font-bold uppercase">Monthly Save</p>
-                          <p className="text-emerald-400 font-bold text-lg">₹{step.monthly_saving.toLocaleString()}</p>
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-gray-500 font-bold uppercase whitespace-nowrap">Monthly Save</p>
+                          <p className="text-emerald-400 font-bold text-base" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>₹{step.monthly_saving.toLocaleString()}</p>
                         </div>
                       </div>
                     </div>

@@ -10,7 +10,8 @@ import {
   Menu,
   LogOut,
   User,
-  Sparkles
+  Sparkles,
+  Brain
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { label: "Score", icon: CreditCard, href: "/score" },
   { label: "Goals", icon: Target, href: "/goals" },
   { label: "Pulse", icon: Activity, href: "/pulse" },
+  { label: "AI Advisor", icon: Brain, href: "/advisor" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 

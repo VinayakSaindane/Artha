@@ -72,4 +72,8 @@ export const limitsApi = {
     getLimits: () => api.get('/limits'),
 };
 
+export const advisorApi = {
+    getStrategy: (data: any) => api.post('/advisor/strategy', data),
+};
+
 export default api;
