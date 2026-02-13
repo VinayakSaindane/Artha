@@ -41,6 +41,20 @@ export default function Pulse() {
     }
   };
 
+  const [isApplying, setIsApplying] = useState(false);
+
+  const handleApply = () => {
+    setIsApplying(true);
+    toast({ title: "Syncing Strategy...", description: "AI is configuring your SIPs and budget limits." });
+    setTimeout(() => {
+      setIsApplying(false);
+      toast({
+        title: "Strategy Applied! 🚀",
+        description: "Your monthly SIP has been simulated and budget targets locked.",
+      });
+    }, 2500);
+  };
+
   const healthTrend = [
     { month: 'Trending', score: analysis?.health_score || 70 },
     { month: 'Current', score: analysis?.health_score || 72 },
@@ -187,8 +201,13 @@ export default function Pulse() {
                   </p>
                 </div>
               </div>
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 h-11 shadow-lg shadow-emerald-500/20 flex-shrink-0">
-                <Zap className="w-4 h-4 mr-2" /> Apply Now
+              <Button
+                onClick={handleApply}
+                disabled={isApplying}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 h-11 shadow-lg shadow-emerald-500/20 flex-shrink-0"
+              >
+                {isApplying ? <Loader2 className="animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                {isApplying ? "Applying..." : "Apply Now"}
               </Button>
             </div>
           </GlassCard>

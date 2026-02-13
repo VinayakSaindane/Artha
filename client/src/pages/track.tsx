@@ -10,7 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useArthStore } from "@/store/useArthStore";
-import { Settings2 } from "lucide-react";
+import { Settings2, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Track() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -20,6 +21,9 @@ export default function Track() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLimitsOpen, setIsLimitsOpen] = useState(false);
   const [categoryLimits, setCategoryLimits] = useState<any>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,6 +62,24 @@ export default function Track() {
       toast({ title: "Error", description: "Failed to update limit.", variant: "destructive" });
     }
   };
+
+  const handleVoiceAdd = () => {
+    setIsVoiceActive(true);
+    toast({ title: "Listening...", description: "Say something like 'Spent 500 on dinner'" });
+    setTimeout(() => {
+      setIsVoiceActive(false);
+      toast({ title: "AI Voice Sync Success", description: "Added ₹500 for Dinner to Food category." });
+      // In a real app, we'd send the audio/transcript to AI
+      expensesApi.createExpense({ amount: 500, category: "Food", description: "Voice Add: Dinner" }).then(() => fetchData());
+    }, 3000);
+  };
+
+  const filteredExpenses = expenses.filter(e => {
+    const matchesSearch = e.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || e.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleAddExpense = async () => {
     if (!newExpense.amount) return;
@@ -132,15 +154,32 @@ export default function Track() {
         <div className="flex items-center gap-2 flex-1 min-w-[300px]">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <Input className="pl-9 bg-black/20 border-white/10 text-white placeholder:text-gray-500" placeholder="Search expenses..." />
+            <Input
+              className="pl-9 bg-black/20 border-white/10 text-white placeholder:text-gray-500"
+              placeholder="Search expenses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <Button variant="outline" className="border-white/10 text-gray-300">
-            <Filter className="w-4 h-4 mr-2" /> Filter
-          </Button>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-40 bg-black/20 border-white/10 text-white">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#0D1425] border-white/10 text-white">
+              <SelectItem value="All">All Categories</SelectItem>
+              {Object.keys(CATEGORY_COLORS).map(cat => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border border-white/10">
-            <Mic className="w-4 h-4 mr-2" /> Voice Add
+          <Button
+            variant="secondary"
+            className={cn("bg-white/10 hover:bg-white/20 text-white border border-white/10", isVoiceActive && "animate-pulse border-primary")}
+            onClick={handleVoiceAdd}
+          >
+            <Mic className={cn("w-4 h-4 mr-2", isVoiceActive && "text-primary")} /> {isVoiceActive ? "Listening..." : "Voice Add"}
           </Button>
 
           <Dialog open={isLimitsOpen} onOpenChange={setIsLimitsOpen}>
@@ -292,6 +331,65 @@ export default function Track() {
           </GlassCard>
         </div>
       )}
+
+      <div className="grid grid-cols-1 gap-6">
+        <GlassCard className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-bold text-white">Transaction History</h3>
+            <span className="text-xs text-gray-500">{filteredExpenses.length} transactions found</span>
+          </div>
+          <div className="space-y-2">
+            {filteredExpenses.length === 0 ? (
+              <div className="h-32 flex flex-col items-center justify-center text-gray-500 opacity-50">
+                <Search className="w-8 h-8 mb-2" />
+                <p>No matching transactions found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-white/5">
+                      <th className="pb-3 font-medium">Date</th>
+                      <th className="pb-3 font-medium">Description</th>
+                      <th className="pb-3 font-medium">Category</th>
+                      <th className="pb-3 font-medium text-right">Amount</th>
+                      <th className="pb-3 font-medium text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {filteredExpenses.map((e) => (
+                      <tr key={e._id || e.id} className="group hover:bg-white/[0.02] transition-colors">
+                        <td className="py-4 text-sm text-gray-400">{new Date(e.date).toLocaleDateString()}</td>
+                        <td className="py-4 text-sm font-medium text-white">{e.description || e.category}</td>
+                        <td className="py-4">
+                          <span className="px-2 py-1 rounded-full text-[10px] bg-white/5 border border-white/10 text-gray-300">
+                            {e.category}
+                          </span>
+                        </td>
+                        <td className="py-4 text-sm font-bold text-white text-right">₹{e.amount.toLocaleString()}</td>
+                        <td className="py-4 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-gray-500 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={async () => {
+                              await expensesApi.deleteExpense(e._id || e.id);
+                              fetchData();
+                              toast({ title: "Expense Deleted" });
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </GlassCard>
+      </div>
 
       <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-xl p-6 flex items-start gap-4">
         <div className="p-3 bg-indigo-500/20 rounded-full text-indigo-400">

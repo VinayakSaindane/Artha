@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { TrendingUp, School, Umbrella, Home, Loader2, Plus, Target } from "lucide-react";
 import { goalsApi } from "@/api/arthApi";
 import { useToast } from "@/hooks/use-toast";
+import { useArthStore } from "@/store/useArthStore";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,8 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 export default function Goals() {
-  const [age, setAge] = useState([28]);
+  const { user } = useArthStore();
+  const [age, setAge] = useState([user?.age || 28]);
   const [retireAge, setRetireAge] = useState([55]);
   const [savings, setSavings] = useState(15000);
   const [planning, setPlanning] = useState(false);

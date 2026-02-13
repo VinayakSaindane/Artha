@@ -23,6 +23,12 @@ export const authApi = {
     updateProfile: (data: any) => api.put('/auth/profile', data),
 };
 
+export const incomeApi = {
+    getIncome: () => api.get('/income'),
+    createIncome: (data: any) => api.post('/income', data),
+    deleteIncome: (id: any) => api.delete(`/income/${id}`),
+};
+
 export const expensesApi = {
     getExpenses: () => api.get('/expenses'),
     createExpense: (data: any) => api.post('/expenses', data),

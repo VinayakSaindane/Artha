@@ -173,6 +173,22 @@ export default function Advisor() {
 
                 {/* Main Content: Results */}
                 <main className="lg:col-span-8 space-y-8 min-h-[600px]">
+                    {/* Active Input Tags */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] text-primary font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-2">
+                            Age {inputs.age}
+                        </div>
+                        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400 font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-4">
+                            Target: {inputs.retirement_age}
+                        </div>
+                        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400 font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-6">
+                            Risk: {inputs.risk_appetite}
+                        </div>
+                        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] text-gray-400 font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-8">
+                            Income: ₹{(inputs.income / 1000).toFixed(0)}k
+                        </div>
+                    </div>
+
                     {!strategy && !loading ? (
                         <GlassCard className="h-full flex flex-col items-center justify-center p-12 text-center border-dashed border-2 opacity-60">
                             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">

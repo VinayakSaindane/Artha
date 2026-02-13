@@ -19,7 +19,7 @@ import { Link } from "wouter";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useArthStore } from "@/store/useArthStore";
 import { useState, useEffect } from "react";
-import { expensesApi, pulseApi, festivalApi } from "@/api/arthApi";
+import { expensesApi, pulseApi, festivalApi, incomeApi } from "@/api/arthApi";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +42,8 @@ export default function Dashboard() {
   const [festivals, setFestivals] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newExpense, setNewExpense] = useState({ amount: "", category: "Food", description: "" });
+  const [isIncomeOpen, setIsIncomeOpen] = useState(false);
+  const [newIncome, setNewIncome] = useState({ amount: "", category: "Bonus", description: "" });
   const { toast } = useToast();
 
   const CATEGORY_COLORS: any = {
@@ -94,13 +96,27 @@ export default function Dashboard() {
     Promise.allSettled([
       expensesApi.getSummary(),
       pulseApi.analyze(),
-      festivalApi.getFestivals()
+      festivalApi.getFestivals(),
+      incomeApi.getIncome()
     ]).then((results: any[]) => {
-      const [summaryRes, pulseRes, festivalRes] = results;
+      const [summaryRes, pulseRes, festivalRes, incomeRes] = results;
+
+      let extraIncome = 0;
+      if (incomeRes.status === 'fulfilled') {
+        extraIncome = incomeRes.value.data.reduce((acc: number, curr: any) => acc + curr.amount, 0);
+      }
+
+      const baseIncome = user?.monthly_income || 50000;
+      const totalIncome = baseIncome + extraIncome;
 
       if (summaryRes.status === 'fulfilled') {
-        const total = summaryRes.value.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
-        setStats((prev: any) => ({ ...prev, expenses: total, savings: (prev?.income || 50000) - total }));
+        const totalExpenses = summaryRes.value.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+        setStats((prev: any) => ({
+          ...prev,
+          income: totalIncome,
+          expenses: totalExpenses,
+          savings: totalIncome - totalExpenses
+        }));
       }
 
       if (pulseRes.status === 'fulfilled') {
@@ -131,6 +147,22 @@ export default function Dashboard() {
       fetchData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to add expense.", variant: "destructive" });
+    }
+  };
+
+  const handleAddIncome = async () => {
+    if (!newIncome.amount) return;
+    try {
+      await incomeApi.createIncome({
+        ...newIncome,
+        amount: parseFloat(newIncome.amount)
+      });
+      toast({ title: "Income Added", description: "Your bonus/earnings have been recorded." });
+      setIsIncomeOpen(false);
+      setNewIncome({ amount: "", category: "Bonus", description: "" });
+      fetchData();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to add income.", variant: "destructive" });
     }
   };
 
@@ -204,6 +236,57 @@ export default function Dashboard() {
                   />
                 </div>
                 <Button onClick={handleAddExpense} className="w-full bg-primary">Save Expense</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={isIncomeOpen} onOpenChange={setIsIncomeOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20">
+                <Plus className="w-4 h-4 mr-2" /> Add Income
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0F1E] border-white/10 text-white">
+              <DialogHeader>
+                <DialogTitle>Add Extra Income</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Amount (₹)</Label>
+                  <Input
+                    type="number"
+                    placeholder="10000"
+                    value={newIncome.amount}
+                    onChange={(e) => setNewIncome({ ...newIncome, amount: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={newIncome.category}
+                    onValueChange={(val) => setNewIncome({ ...newIncome, category: val })}
+                  >
+                    <SelectTrigger className="bg-black/40 border-white/10">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#0D1425] border-white/10 text-white">
+                      {['Bonus', 'Side Hustle', 'Refund', 'Gift', 'Interest', 'Other'].map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Input
+                    placeholder="e.g. Performance Bonus"
+                    value={newIncome.description}
+                    onChange={(e) => setNewIncome({ ...newIncome, description: e.target.value })}
+                    className="bg-black/40 border-white/10"
+                  />
+                </div>
+                <Button onClick={handleAddIncome} className="w-full bg-emerald-500 hover:bg-emerald-600">Record Income</Button>
               </div>
             </DialogContent>
           </Dialog>
