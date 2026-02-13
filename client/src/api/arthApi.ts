@@ -18,15 +18,7 @@ api.interceptors.request.use((config: any) => {
 
 export const authApi = {
     register: (data: any) => api.post('/auth/register', data),
-    login: (data: any) => {
-        // FastAPI expects form data for OAuth2PasswordRequestForm
-        const formData = new FormData();
-        formData.append('username', data.email);
-        formData.append('password', data.password);
-        return api.post('/auth/login', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
-    },
+    login: (data: any) => api.post('/auth/login', data),
     getMe: () => api.get('/auth/me'),
 };
 
@@ -38,7 +30,18 @@ export const expensesApi = {
 };
 
 export const shieldApi = {
-    analyze: (text: string) => api.post('/shield/analyze', { text }),
+    analyze: (data: { text?: string; file?: File }) => {
+        const formData = new FormData();
+        if (data.file) {
+            formData.append('file', data.file);
+        }
+        if (data.text) {
+            formData.append('text', data.text);
+        }
+        return api.post('/shield/analyze', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
+    },
     getHistory: () => api.get('/shield/history'),
 };
 
