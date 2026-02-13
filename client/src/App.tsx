@@ -14,6 +14,7 @@ import Score from "@/pages/score";
 import Goals from "@/pages/goals";
 import Pulse from "@/pages/pulse";
 import FestivalShield from "@/pages/festival-shield";
+import Settings from "@/pages/settings";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
         <Route path="/score" component={Score} />
         <Route path="/goals" component={Goals} />
         <Route path="/pulse" component={Pulse} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

@@ -20,6 +20,7 @@ export const authApi = {
     register: (data: any) => api.post('/auth/register', data),
     login: (data: any) => api.post('/auth/login', data),
     getMe: () => api.get('/auth/me'),
+    updateProfile: (data: any) => api.put('/auth/profile', data),
 };
 
 export const expensesApi = {
