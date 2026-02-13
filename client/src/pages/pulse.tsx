@@ -66,7 +66,7 @@ export default function Pulse() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Forecast Hero Card - Takes full width for premium look */}
         <GlassCard className={`lg:col-span-3 p-12 flex flex-col items-center justify-center text-center border-rose-500/30 bg-gradient-to-b ${analysis?.status === 'DANGER' ? 'from-rose-950/30' :
-            analysis?.status === 'WARNING' ? 'from-amber-950/30' : 'from-emerald-950/30'
+          analysis?.status === 'WARNING' ? 'from-amber-950/30' : 'from-emerald-950/30'
           } to-transparent relative overflow-hidden`}>
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Sparkles className="w-32 h-32" />
@@ -74,11 +74,11 @@ export default function Pulse() {
           <h3 className="text-gray-400 font-medium tracking-widest uppercase mb-4">Debt Trap Forecast</h3>
           <div className="relative">
             <h1 className={`text-6xl md:text-9xl font-bold tracking-tighter tabular-nums ${analysis?.status === 'DANGER' ? 'text-rose-500' :
-                analysis?.status === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'
+              analysis?.status === 'WARNING' ? 'text-amber-500' : 'text-emerald-500'
               }`}>
               {analysis?.debt_trap_days ? `${analysis.debt_trap_days} DAYS` : 'SAFE'}
             </h1>
-            <p className="text-gray-400 mt-4 font-medium text-lg">Until you hit critical EMI ratio (>50%)</p>
+            <p className="text-gray-400 mt-4 font-medium text-lg">Until you hit critical EMI ratio (&gt;50%)</p>
           </div>
         </GlassCard>
 
