@@ -68,19 +68,33 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     setLoading(true);
+    // Stage 1: Fast Load
     try {
       const expensesRes = await expensesApi.getExpenses();
       setRecentExpenses(expensesRes.data.slice(0, 4));
 
-      const [summaryRes, pulseRes, festivalRes] = await Promise.allSettled([
-        expensesApi.getSummary(),
-        pulseApi.analyze(),
-        festivalApi.getFestivals()
-      ]);
+      // Calculate initial stats early
+      const initialTotal = expensesRes.data.reduce((acc: number, curr: any) => acc + (curr.amount || 0), 0);
+      setStats({
+        income: user?.monthly_income || 0,
+        expenses: initialTotal,
+        savings: (user?.monthly_income || 0) - initialTotal
+      });
+    } catch (e) {
+      console.warn("Initial Load Error", e);
+    }
 
-      let totalExpenses = 0;
+    // Stage 2: Secondary Loads (AI and Summary)
+    Promise.allSettled([
+      expensesApi.getSummary(),
+      pulseApi.analyze(),
+      festivalApi.getFestivals()
+    ]).then((results: any[]) => {
+      const [summaryRes, pulseRes, festivalRes] = results;
+
       if (summaryRes.status === 'fulfilled') {
-        totalExpenses = summaryRes.value.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+        const total = summaryRes.value.data.reduce((acc: number, curr: any) => acc + curr.total_amount, 0);
+        setStats((prev: any) => ({ ...prev, expenses: total, savings: (prev?.income || 50000) - total }));
       }
 
       if (pulseRes.status === 'fulfilled') {
@@ -90,19 +104,12 @@ export default function Dashboard() {
       if (festivalRes.status === 'fulfilled') {
         setFestivals(festivalRes.value.data);
       }
-
-      setStats({
-        income: user?.monthly_income || 0,
-        expenses: totalExpenses,
-        savings: (user?.monthly_income || 0) - totalExpenses
-      });
-    } catch (error) {
-      console.error("Dashboard Fetch Error:", error);
-      // Fallback: Set empty stats to stop loader
-      setStats({ income: user?.monthly_income || 0, expenses: 0, savings: 0 });
-    } finally {
+    }).finally(() => {
       setLoading(false);
-    }
+    });
+
+    // Safety timeout to ensure loader disappears
+    setTimeout(() => setLoading(false), 3000);
   };
 
   const handleAddExpense = async () => {

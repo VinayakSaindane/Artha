@@ -120,8 +120,8 @@ export default function Goals() {
                 <div>
                   <h4 className="font-bold text-emerald-400 text-sm mb-1">AI Recommendation</h4>
                   <p className="text-xs text-gray-300 leading-relaxed">
-                    Target Corpus: ₹{(plan.retirement_corpus_needed / 10000000).toFixed(1)}Cr.
-                    Monthly SIP Needed: <span className="text-white font-bold">₹{plan.monthly_sip_needed.toLocaleString()}</span>.
+                    Target Corpus: ₹{((plan?.retirement_corpus_needed || 0) / 10000000).toFixed(1)}Cr.
+                    Monthly SIP Needed: <span className="text-white font-bold">₹{(plan?.monthly_sip_needed || 0).toLocaleString()}</span>.
                   </p>
                 </div>
               </div>
