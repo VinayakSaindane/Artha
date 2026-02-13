@@ -1,7 +1,7 @@
 import { GlassCard, PageHeader } from "@/components/ui-custom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Activity, AlertOctagon, TrendingUp, DollarSign, Loader2, Sparkles, CheckCircle, Zap } from "lucide-react";
+import { Activity, AlertOctagon, TrendingUp, DollarSign, Loader2, Sparkles, CheckCircle, Zap, ArrowRight } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useState, useEffect } from "react";
 import { pulseApi } from "@/api/arthApi";
@@ -151,77 +151,95 @@ export default function Pulse() {
             </ResponsiveContainer>
           </div>
         </GlassCard>
+      </div>
 
-        {/* AI Prescription - FULL WIDTH and Optimized */}
-        {analysis?.prescription && (
-          <GlassCard className="lg:col-span-3 p-8 md:p-12 border-l-8 border-l-emerald-500 bg-emerald-500/5 relative overflow-hidden mt-2">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <AlertOctagon className="w-48 h-48 text-emerald-500" />
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 relative z-10 items-stretch">
-              {/* Left Info Column - Made Wider with proper width constraints */}
-              <div className="xl:col-span-5 flex flex-col h-full bg-black/20 p-8 rounded-3xl border border-white/5 min-w-0">
-                <div className="p-4 bg-emerald-500/20 rounded-2xl w-fit mb-6">
-                  <AlertOctagon className="w-8 h-8 text-emerald-400" />
+      {/* AI Prescription - REDESIGNED FOR BETTER LAYOUT */}
+      {analysis?.prescription && (
+        <div className="space-y-6 mt-8">
+          {/* Header Section */}
+          <GlassCard className="p-8 border-l-4 border-l-emerald-500 bg-emerald-500/5">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start gap-4 flex-1">
+                <div className="p-3 bg-emerald-500/20 rounded-xl flex-shrink-0">
+                  <AlertOctagon className="w-6 h-6 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-4 leading-tight" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
-                  Immediate Action Plan
-                </h3>
-                <p className="text-gray-400 leading-relaxed text-sm flex-1" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
-                  {analysis.scenario_if_no_action || "Your financial health is currently stable. Follow these AI-curated steps to further optimize your savings and bulletproof your future from debt traps."}
-                </p>
-                <Button className="mt-8 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 shadow-lg shadow-emerald-500/20">
-                  <Zap className="w-4 h-4 mr-2" /> Apply Strategy
-                </Button>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    AI-Powered Action Plan
+                  </h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">
+                    {analysis.scenario_if_no_action || "Your financial health is currently stable. Follow these AI-curated steps to further optimize your savings and bulletproof your future from debt traps."}
+                  </p>
+                </div>
               </div>
-
-              {/* Steps Grid Column */}
-              <div className="xl:col-span-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-w-0">
-                {(analysis.prescription || []).map((step: any, i: number) => (
-                  <div key={i} className="bg-black/30 p-6 rounded-3xl border border-white/10 hover:border-emerald-500/30 transition-all flex flex-col justify-between group relative min-w-0">
-                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-10 transition-opacity">
-                      <CheckCircle className="w-16 h-16 text-emerald-500" />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-4 flex-wrap">
-                        <span className="text-emerald-400 font-bold text-[10px] tracking-[0.2em] uppercase bg-emerald-500/10 px-3 py-1 rounded-full whitespace-nowrap">
-                          Step 0{i + 1}
-                        </span>
-                        <span className={cn(
-                          "text-[10px] font-bold uppercase tracking-widest border px-3 py-1 rounded-full whitespace-nowrap",
-                          step.priority === 'HIGH' ? "text-rose-400 border-rose-500/30 bg-rose-500/5" : "text-emerald-400 border-emerald-500/30 bg-emerald-500/5"
-                        )}>
-                          {step.priority}
-                        </span>
-                      </div>
-                      <h4 className="text-white font-bold text-base mb-3 leading-snug group-hover:text-emerald-400 transition-colors" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
-                        Action Required
-                      </h4>
-                      <p className="text-gray-300 text-sm leading-relaxed mb-6" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>
-                        {step.action}
-                      </p>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/5 flex items-center justify-between min-w-0">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                          <DollarSign className="w-4 h-4 text-emerald-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[10px] text-gray-500 font-bold uppercase whitespace-nowrap">Monthly Save</p>
-                          <p className="text-emerald-400 font-bold text-base" style={{ wordBreak: 'normal', overflowWrap: 'break-word' }}>₹{step.monthly_saving.toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 h-11 shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                <Zap className="w-4 h-4 mr-2" /> Apply Now
+              </Button>
             </div>
           </GlassCard>
-        )}
-      </div>
+
+          {/* Action Steps Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {(analysis.prescription || []).map((step: any, i: number) => (
+              <GlassCard
+                key={i}
+                className="p-6 border border-white/10 hover:border-emerald-500/50 transition-all group relative overflow-hidden"
+              >
+                {/* Background Effect */}
+                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-5 transition-opacity">
+                  <CheckCircle className="w-24 h-24 text-emerald-500" />
+                </div>
+
+                {/* Content */}
+                <div className="relative z-10 space-y-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-emerald-400 font-bold text-xs tracking-wider uppercase bg-emerald-500/10 px-3 py-1.5 rounded-full">
+                      Step {i + 1}
+                    </span>
+                    <span className={cn(
+                      "text-xs font-bold uppercase tracking-wider border px-3 py-1.5 rounded-full",
+                      step.priority === 'HIGH'
+                        ? "text-rose-400 border-rose-500/30 bg-rose-500/10"
+                        : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
+                    )}>
+                      {step.priority}
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h4 className="text-white font-bold text-lg leading-tight group-hover:text-emerald-400 transition-colors">
+                    Action Required
+                  </h4>
+
+                  {/* Description */}
+                  <p className="text-gray-300 text-sm leading-relaxed min-h-[80px]">
+                    {step.action}
+                  </p>
+
+                  {/* Footer */}
+                  <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <DollarSign className="w-5 h-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 font-medium uppercase">
+                          Monthly Savings
+                        </p>
+                        <p className="text-emerald-400 font-bold text-lg">
+                          ₹{step.monthly_saving.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-emerald-400 transition-colors" />
+                  </div>
+                </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
