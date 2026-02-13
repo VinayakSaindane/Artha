@@ -2,7 +2,7 @@
 
 **Empowering the Indian Middle Class with Intelligent Wealth Protection & Strategic Planning.**
 
-[![GitHub stars](https://img.shields.io/github/stars/Code-Icon/techhives?style=for-the-badge)](https://github.com/Code-Icon/techhives/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/VinayakSaindane/Artha?style=for-the-badge)](https://github.com/VinayakSaindane/Artha/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
@@ -71,8 +71,8 @@ ARTHA features a **state-of-the-art Glassmorphic UI** designed for clarity and e
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Code-Icon/techhives.git
-   cd techhives
+   git clone https://github.com/VinayakSaindane/Artha.git
+   cd Artha
    ```
 
 2. **Frontend Setup**
@@ -90,6 +90,23 @@ ARTHA features a **state-of-the-art Glassmorphic UI** designed for clarity and e
    # Create a .env with: MONGODB_URI, JWT_SECRET, GEMINI_API_KEY
    node src/index.js
    ```
+
+4. **Deploy to Vercel** 🚀
+   ```bash
+   # Install Vercel CLI
+   npm install -g vercel
+   
+   # Deploy
+   vercel
+   ```
+   
+   Or use the Vercel Dashboard:
+   - Go to [vercel.com](https://vercel.com)
+   - Import the `VinayakSaindane/Artha` repository
+   - Add environment variables
+   - Deploy!
+   
+   📖 **For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)**
 
 ---
 
